@@ -19,7 +19,7 @@ fn main() {
     last = 0;
     increases = 0;
     for window in ints.windows(3) {
-        let sum = window[0] + window[1] + window[2];
+        let sum = window.iter().sum();
         if last != 0 && last < sum {
             increases += 1;
         }
