@@ -51,11 +51,30 @@ fn main() {
         .collect();
     // Part 1
     let mut point = Point::origin();
+    for dir in dirs.iter() {
+        let offset = match dir {
+            Direction::Forward(x) => (*x as i32, 0),
+            Direction::Up(x) => (0, -(*x as i32)),
+            Direction::Down(x) => (0, *x as i32),
+        };
+        point += offset;
+    }
+    println!("{}", point.x() * point.y());
+
+    // Part 2
+    let mut aim: i32 = 0;
+    point = Point::origin();
     for dir in dirs {
         let offset = match dir {
-            Direction::Forward(x) => (x as i32, 0),
-            Direction::Up(x) => (0, -(x as i32)),
-            Direction::Down(x) => (0, x as i32),
+            Direction::Forward(x) => (x as i32, aim * x as i32),
+            Direction::Up(x) => {
+                aim -= x as i32;
+                (0, 0)
+            }
+            Direction::Down(x) => {
+                aim += x as i32;
+                (0, 0)
+            }
         };
         point += offset;
     }
