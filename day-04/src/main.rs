@@ -51,6 +51,18 @@ impl BingoBoard {
 
         rows_win || columns_win
     }
+
+    pub fn unmarked_sum(&self) -> u32 {
+        (0..BOARD_SIZE)
+            .map(|y| {
+                (0..BOARD_SIZE)
+                    .map(|x| self.at(x, y))
+                    .filter(|(_, mark)| !mark)
+                    .map(|(n, _)| n)
+                    .sum::<u32>()
+            })
+            .sum()
+    }
 }
 
 fn main() {
@@ -81,25 +93,29 @@ fn main() {
         }
     }
 
-    // Part 1
-    let mut winner = None;
-    let mut called = 0;
-    'outer: for num in called_numbers {
-        called = num;
-        for board in boards.iter_mut() {
+    // Part 1/2
+    let mut win_order = Vec::new();
+    let mut won_on = vec![0; boards.len()];
+    for num in called_numbers {
+        for (i, board) in boards.iter_mut().enumerate() {
+            if win_order.contains(&i) {
+                continue;
+            }
             board.mark(num);
             if board.wins() {
-                winner = Some(board.clone());
-                break 'outer;
+                win_order.push(i);
+                won_on[i] = num;
             }
         }
     }
 
-    let unmarked_sum: u32 = (0..BOARD_SIZE)
-        .map(|y| 
-            (0..BOARD_SIZE).map(|x| winner.as_ref().unwrap().at(x, y)).filter(|(_, mark)| !mark).map(|(n, _)| n).sum::<u32>()
-        ).sum();
+    let winner_idx = win_order[0];
+    let winner = &boards[winner_idx];
+    let winner_won_on = won_on[winner_idx];
+    println!("{}", winner.unmarked_sum() * winner_won_on);
 
-
-    println!("{}", unmarked_sum * called);
+    let loser_idx = win_order[win_order.len() - 1];
+    let loser = &boards[loser_idx];
+    let loser_won_on = won_on[loser_idx];
+    println!("{}", loser.unmarked_sum() * loser_won_on);
 }
