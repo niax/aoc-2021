@@ -1,6 +1,7 @@
 use std::fmt;
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
+#[derive(Eq, PartialEq)]
 pub struct Point<T> {
     x: T,
     y: T,

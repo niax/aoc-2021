@@ -1,9 +1,9 @@
 use commons::geom::Point;
 use commons::grid::{Grid, SparseGrid};
 use commons::io::load_file_lines;
-use std::cmp::{max, min};
 use std::num::ParseIntError;
 use std::str::FromStr;
+use std::cmp::Ordering;
 use thiserror::Error;
 
 #[derive(Debug)]
@@ -21,6 +21,14 @@ enum LineParseError {
     MissingField,
 }
 
+fn sign(i: isize) -> isize {
+    match i.cmp(&0) {
+        Ordering::Greater => 1,
+        Ordering::Less => -1,
+        Ordering::Equal => 0 ,
+    }
+}
+
 impl Line {
     pub fn from(&self) -> &Point<isize> {
         &self.from
@@ -31,23 +39,21 @@ impl Line {
     }
 
     pub fn draw_on(&self, grid: &mut SparseGrid<isize>) {
-        if self.from.x() == self.to.x() {
-            let y_max = max(self.from.y(), self.to.y());
-            let y_min = min(self.from.y(), self.to.y());
-            for y in *y_min..=*y_max {
-                let coord = (*self.from.x(), y);
-                let v = grid.at(&coord).unwrap_or(&0);
-                grid.set(coord, v + 1);
-            }
-        } else if self.from.y() == self.to.y() {
-            let x_max = max(self.from.x(), self.to.x());
-            let x_min = min(self.from.x(), self.to.x());
-            for x in *x_min..=*x_max {
-                let coord = (x, *self.from.y());
-                let v = grid.at(&coord).unwrap_or(&0);
-                grid.set(coord, v + 1);
-            }
+        let dy = self.to.y() - self.from.y();
+        let dx = self.to.x() - self.from.x();
+        let grad = (sign(dx), sign(dy));
+
+        let mut point = *self.from();
+        while point != *self.to() {
+            let coord = (*point.x(), *point.y());
+            let v = grid.at(&coord).unwrap_or(&0);
+            grid.set(coord, v + 1);
+            point += grad;
         }
+
+        let coord = (*self.to.x(), *self.to.y());
+        let v = grid.at(&coord).unwrap_or(&0);
+        grid.set(coord, v + 1);
     }
 }
 
@@ -94,6 +100,17 @@ fn print_grid(grid: &SparseGrid<isize>) {
     }
 }
 
+fn overlapping_points(grid: &SparseGrid<isize>) -> usize {
+    (0..grid.height())
+        .map(|y| {
+            (0..grid.width())
+                .map(|x| grid.at(&(x as isize, y as isize)).unwrap_or(&0))
+                .filter(|v| **v > 1)
+                .count()
+        })
+        .sum()
+}
+
 fn main() {
     let lines: Vec<Line> = load_file_lines("input.txt")
         .map(|res| res.unwrap())
@@ -106,15 +123,19 @@ fn main() {
             line.draw_on(&mut grid);
         }
     }
-    //print_grid(&grid);
 
-    let part1: usize = (0..grid.height())
-        .map(|y| {
-            (0..grid.width())
-                .map(|x| grid.at(&(x as isize, y as isize)).unwrap_or(&0))
-                .filter(|v| **v > 1)
-                .count()
-        })
-        .sum();
+    let part1 = overlapping_points(&grid);
     println!("{}", part1);
+
+    grid = SparseGrid::new();
+    grid.set((0, 0), 0);
+    grid.set((9, 9), 0);
+    for line in &lines {
+        //println!("{:?}", line);
+        line.draw_on(&mut grid);
+        //print_grid(&grid);
+    }
+
+    let part2 = overlapping_points(&grid);
+    println!("{}", part2);
 }
