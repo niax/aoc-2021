@@ -38,7 +38,9 @@ impl Line {
         &self.to
     }
 
-    pub fn draw_on(&self, grid: &mut SparseGrid<isize>) {
+    pub fn draw_on<T>(&self, grid: &mut T)
+        where T: Grid<Coordinate = (isize, isize), Value=isize>,
+    {
         let dy = self.to.y() - self.from.y();
         let dx = self.to.x() - self.from.x();
         let grad = (sign(dx), sign(dy));
@@ -100,15 +102,10 @@ fn print_grid(grid: &SparseGrid<isize>) {
     }
 }
 
-fn overlapping_points(grid: &SparseGrid<isize>) -> usize {
-    (0..grid.height())
-        .map(|y| {
-            (0..grid.width())
-                .map(|x| grid.at(&(x as isize, y as isize)).unwrap_or(&0))
-                .filter(|v| **v > 1)
-                .count()
-        })
-        .sum()
+fn overlapping_points<T, C>(grid: &T) -> usize 
+    where T: Grid<Coordinate=C, Value=isize>
+{
+    grid.points().iter().filter(|(_, v)| **v > 1).count()
 }
 
 fn main() {

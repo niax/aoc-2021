@@ -8,6 +8,7 @@ pub trait Grid {
     fn height(&self) -> usize;
     fn width(&self) -> usize;
     fn at(&self, coord: &Self::Coordinate) -> Option<&Self::Value>;
+    fn set(&mut self, coord: Self::Coordinate, value: Self::Value);
 
     fn points(&self) -> Vec<(Self::Coordinate, &Self::Value)>;
     fn from_rows(source: impl IntoIterator<Item = impl IntoIterator<Item = Self::Value>>) -> Self;
@@ -78,6 +79,18 @@ impl<T> Grid for VecGrid<T> {
         self.rows.get(*y).map(|row| row.get(*x)).flatten()
     }
 
+    fn set(&mut self, coord: Self::Coordinate, value: T) {
+        let (x, y) = coord;
+        if x >= self.width.unwrap_or(0) {
+            panic!("Setting value outside of grid: {} > width {:?}", x, self.width);
+        }
+        if y >= self.rows.len() {
+            panic!("Setting value outside of grid: {} > height {}", y, self.rows.len());
+        }
+
+        self.rows[y][x] = value;
+    }
+
     fn points(&self) -> Vec<(Self::Coordinate, &Self::Value)> {
         self.rows
             .iter()
@@ -114,10 +127,6 @@ impl<T> SparseGrid<T> {
         }
     }
 
-    pub fn set(&mut self, coord: (isize, isize), val: T) {
-        self.cells.insert(coord, val);
-    }
-
     fn key_range<F>(&self, key_fn: F) -> usize
     where
         F: Fn(isize, isize) -> isize,
@@ -151,6 +160,10 @@ impl<T> Grid for SparseGrid<T> {
 
     fn at(&self, coord: &Self::Coordinate) -> Option<&T> {
         self.cells.get(coord)
+    }
+
+    fn set(&mut self, coord: Self::Coordinate, val: T) {
+        self.cells.insert(coord, val);
     }
 
     fn points(&self) -> Vec<(Self::Coordinate, &Self::Value)> {
