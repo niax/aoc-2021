@@ -1,0 +1,120 @@
+use commons::geom::Point;
+use commons::grid::{Grid, SparseGrid};
+use commons::io::load_file_lines;
+use std::cmp::{max, min};
+use std::num::ParseIntError;
+use std::str::FromStr;
+use thiserror::Error;
+
+#[derive(Debug)]
+struct Line {
+    from: Point<isize>,
+    to: Point<isize>,
+}
+
+#[derive(Debug, Error)]
+enum LineParseError {
+    #[error("Bad number")]
+    BadNumber(#[from] ParseIntError),
+
+    #[error("Missing field")]
+    MissingField,
+}
+
+impl Line {
+    pub fn from(&self) -> &Point<isize> {
+        &self.from
+    }
+
+    pub fn to(&self) -> &Point<isize> {
+        &self.to
+    }
+
+    pub fn draw_on(&self, grid: &mut SparseGrid<isize>) {
+        if self.from.x() == self.to.x() {
+            let y_max = max(self.from.y(), self.to.y());
+            let y_min = min(self.from.y(), self.to.y());
+            for y in *y_min..=*y_max {
+                let coord = (*self.from.x(), y);
+                let v = grid.at(&coord).unwrap_or(&0);
+                grid.set(coord, v + 1);
+            }
+        } else if self.from.y() == self.to.y() {
+            let x_max = max(self.from.x(), self.to.x());
+            let x_min = min(self.from.x(), self.to.x());
+            for x in *x_min..=*x_max {
+                let coord = (x, *self.from.y());
+                let v = grid.at(&coord).unwrap_or(&0);
+                grid.set(coord, v + 1);
+            }
+        }
+    }
+}
+
+impl FromStr for Line {
+    type Err = LineParseError;
+
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        let input_string = input.to_string();
+        let mut iter = input_string.split_whitespace();
+
+        let from_str: Vec<isize> = iter
+            .next()
+            .ok_or(LineParseError::MissingField)?
+            .split(',')
+            .map(|x| x.parse().unwrap())
+            .collect();
+        let _ = iter.next().ok_or(LineParseError::MissingField)?;
+        let to_str: Vec<isize> = iter
+            .next()
+            .ok_or(LineParseError::MissingField)?
+            .split(',')
+            .map(|x| x.parse().unwrap())
+            .collect();
+
+        Ok(Line {
+            from: Point::new(from_str[0], from_str[1]),
+            to: Point::new(to_str[0], to_str[1]),
+        })
+    }
+}
+
+fn print_grid(grid: &SparseGrid<isize>) {
+    for y in 0..grid.height() {
+        for x in 0..grid.width() {
+            let coord = (x as isize, y as isize);
+            print!(
+                "{}",
+                grid.at(&coord)
+                    .map(|i| i.to_string())
+                    .unwrap_or_else(|| ".".to_string())
+            );
+        }
+        println!();
+    }
+}
+
+fn main() {
+    let lines: Vec<Line> = load_file_lines("input.txt")
+        .map(|res| res.unwrap())
+        .collect();
+
+    let mut grid = SparseGrid::new();
+
+    for line in &lines {
+        if line.from().x() == line.to().x() || line.from().y() == line.to().y() {
+            line.draw_on(&mut grid);
+        }
+    }
+    //print_grid(&grid);
+
+    let part1: usize = (0..grid.height())
+        .map(|y| {
+            (0..grid.width())
+                .map(|x| grid.at(&(x as isize, y as isize)).unwrap_or(&0))
+                .filter(|v| **v > 1)
+                .count()
+        })
+        .sum();
+    println!("{}", part1);
+}
