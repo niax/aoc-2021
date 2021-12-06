@@ -6,21 +6,31 @@ fn main() {
     let mut line = String::new();
     file.read_to_string(&mut line).expect("File read");
     line = line.split_whitespace().collect();
-    let initial: Vec<u32> = line.split(',').map(|x| x.parse().unwrap()).collect();
+    let mut initial = vec![0; 8];
+    for s in line.split(',') {
+        let i: usize = s.parse().unwrap();
+        initial[i] += 1;
+    }
 
     let mut current = initial;
-    let mut next = Vec::new();
-    for _ in 0..80 {
-        for v in &current {
-            if *v == 0 {
-                next.push(8);
-                next.push(6);
+    let mut next = vec![0; 9];
+    for day in 1..=256 {
+        for (i, v) in current.iter().enumerate() {
+            if i == 0 {
+                next[8] += v;
+                next[6] += v;
             } else {
-                next.push(v - 1);
+                next[i - 1] += v;
             }
         }
         current = next;
-        next = Vec::new();
+        next = vec![0; 9];
+        // Part 1
+        if day == 80 {
+            println!("{}", current.iter().sum::<u64>());
+        }
     }
-    println!("{}", current.len());
+
+    // Part 2
+    println!("{}", current.iter().sum::<u64>());
 }
