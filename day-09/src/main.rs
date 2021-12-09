@@ -1,7 +1,7 @@
 use commons::grid::{Grid, VecGrid};
 use commons::io::load_file_lines;
 use itertools::Itertools;
-use std::collections::{HashSet, VecDeque};
+use std::collections::VecDeque;
 
 fn main() {
     let mut grid = VecGrid::new();
@@ -45,16 +45,15 @@ fn main() {
     let mut sizes = Vec::new();
     for point in low_points {
         let mut to_search = VecDeque::from([point]);
-        let mut seen = HashSet::new();
         let mut size = 0;
         while !to_search.is_empty() {
             let coord = to_search.pop_front().unwrap();
             let maybe_value = grid.at(&coord);
-            if seen.contains(&coord) || maybe_value.is_none() {
+            if maybe_value.is_none() {
                 continue;
             }
             let value = *maybe_value.unwrap();
-            if value == 9 {
+            if value == 9 || value == u32::MAX {
                 continue;
             }
             size += 1;
@@ -69,7 +68,7 @@ fn main() {
                 }
             }
 
-            seen.insert(coord);
+            grid.set(coord, u32::MAX);
         }
         sizes.push(size);
     }
