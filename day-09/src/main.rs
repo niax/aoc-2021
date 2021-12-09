@@ -1,32 +1,33 @@
-use commons::grid::{Grid, SparseGrid};
+use commons::grid::{Grid, VecGrid};
 use commons::io::load_file_lines;
 use itertools::Itertools;
 use std::collections::{HashSet, VecDeque};
 
 fn main() {
-    let mut grid = SparseGrid::new();
+    let mut grid = VecGrid::new();
     let adjacent: Vec<(isize, isize)> = vec![(0, -1), (0, 1), (1, 0), (-1, 0)];
 
-    for (y, line) in load_file_lines::<String>("input.txt").enumerate() {
-        for (x, c) in line.unwrap().chars().enumerate() {
-            grid.set(
-                (x as isize, y as isize),
-                c.to_string().parse::<u8>().unwrap(),
-            );
-        }
+    for line in load_file_lines::<String>("input.txt") {
+        grid.add_row(line.unwrap().chars().map(|c| c.to_digit(10).unwrap()));
     }
 
     let mut low_points = Vec::new();
     for y in 0..grid.height() {
         for x in 0..grid.width() {
-            let coord = (x as isize, y as isize);
+            let coord = (x, y);
             let value = grid.at(&coord).unwrap();
             let surrounding_greater = adjacent
                 .iter()
-                .map(|(x1, y1)| {
-                    grid.at(&(x as isize + x1, y as isize + y1))
-                        .copied()
-                        .unwrap_or(u8::MAX)
+                .map(|&(x1, y1)| {
+                    let x2 = x as isize + x1;
+                    let y2 = y as isize + y1;
+                    if x2 < 0 || y2 < 0 {
+                        u32::MAX
+                    } else {
+                        grid.at(&(x2 as usize, y2 as usize))
+                            .copied()
+                            .unwrap_or(u32::MAX)
+                    }
                 })
                 .filter(|v1| v1 > value)
                 .count();
@@ -37,7 +38,7 @@ fn main() {
     }
     let part1 = low_points
         .iter()
-        .map(|c| *grid.at(c).unwrap() as u32 + 1)
+        .map(|c| *grid.at(c).unwrap() + 1)
         .sum::<u32>();
     println!("{}", part1);
 
@@ -60,8 +61,12 @@ fn main() {
 
             let (x, y) = coord;
             for &(x1, y1) in &adjacent {
-                let next = (x + x1, y + y1);
-                to_search.push_back(next);
+                let x2 = x as isize + x1;
+                let y2 = y as isize  + y1;
+                if x2 >= 0 && y2 >= 0 {
+                    let next = (x2 as usize, y2 as usize);
+                    to_search.push_back(next);
+                }
             }
 
             seen.insert(coord);
