@@ -1,4 +1,4 @@
-use commons::io::load_stdin_lines;
+use aoc2021::commons::io::load_stdin_lines;
 use itertools::Itertools;
 
 fn main() {
