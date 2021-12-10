@@ -23,7 +23,7 @@ impl PuzzleInput {
         Self {
             digits,
             wanted_numbers,
-            solution: None
+            solution: None,
         }
     }
 
@@ -75,12 +75,14 @@ impl PuzzleInput {
             wires_to_digit.insert(s, k);
         }
 
-        self.solution = Some(self.wanted_numbers
-            .iter()
-            .map(|s| s.iter().sorted().collect::<String>())
-            .map(|s| wires_to_digit.get(&s).unwrap_or(&u8::MAX))
-            .copied()
-            .collect());
+        self.solution = Some(
+            self.wanted_numbers
+                .iter()
+                .map(|s| s.iter().sorted().collect::<String>())
+                .map(|s| wires_to_digit.get(&s).unwrap_or(&u8::MAX))
+                .copied()
+                .collect(),
+        );
     }
 
     pub fn solve(&mut self) -> Vec<u8> {
@@ -127,9 +129,7 @@ impl FromStr for PuzzleInput {
 }
 
 fn main() {
-    let mut input: Vec<PuzzleInput> = load_stdin_lines()
-        .map(|res| res.unwrap())
-        .collect();
+    let mut input: Vec<PuzzleInput> = load_stdin_lines().map(|res| res.unwrap()).collect();
 
     let wanted_part1 = vec![1, 4, 7, 8];
     let part1: usize = input

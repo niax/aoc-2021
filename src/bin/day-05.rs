@@ -1,7 +1,7 @@
 use aoc2021::commons::{
     geom::Point,
     grid::{Grid, VecGrid},
-    io::load_stdin_lines
+    io::load_stdin_lines,
 };
 use std::cmp::{self, Ordering};
 use std::num::ParseIntError;
@@ -40,27 +40,30 @@ impl Line {
         &self.to
     }
 
+    pub fn is_diagonal(&self) -> bool {
+        !(self.from().x() == self.to().x() || self.from().y() == self.to().y())
+    }
+
     pub fn draw_on<T>(&self, grid: &mut T)
     where
         T: Grid<Coordinate = (usize, usize), Value = isize>,
     {
-        let dy :isize = *self.to.y() as isize - *self.from.y() as isize;
-        let dx  :isize= *self.to.x()  as isize- *self.from.x() as isize;
+        let dy: isize = *self.to.y() as isize - *self.from.y() as isize;
+        let dx: isize = *self.to.x() as isize - *self.from.x() as isize;
         let grad = (sign(dx), sign(dy));
 
-        let mut point = *self.from();
-        while point != *self.to() {
-            let coord = (*point.x(), *point.y());
+        let mut x = *self.from().x();
+        let mut y = *self.from().y();
+        while (x, y) != (*self.to().x(), *self.to().y()) {
+            let coord = (x, y);
             let v = grid.at(&coord).unwrap_or(&0) + 1;
             grid.set(coord, v);
-            point = Point::new(
-                (*point.x() as isize + grad.0) as usize,
-                (*point.y() as isize + grad.1) as usize);
+            x = (x as isize + grad.0) as usize;
+            y = (y as isize + grad.1) as usize;
         }
-        let coord = (*point.x(), *point.y());
-        let v = grid.at(&coord).unwrap_or(&0) + 1;
+        let coord = (x, y);
+        let v = grid.at(&(x, y)).unwrap_or(&0) + 1;
         grid.set(coord, v);
-
     }
 }
 
@@ -100,12 +103,20 @@ where
 }
 
 fn main() {
-    let lines: Vec<Line> = load_stdin_lines()
-        .map(|res| res.unwrap())
-        .collect();
+    let lines: Vec<Line> = load_stdin_lines().map(|res| res.unwrap()).collect();
 
-    let max_x = lines.iter().map(|l| cmp::max(l.from.x(), l.to.x())).max().unwrap() + 1;
-    let max_y = lines.iter().map(|l| cmp::max(l.from.y(), l.to.y())).max().unwrap() + 1;
+    let max_x = lines
+        .iter()
+        .map(|l| cmp::max(l.from.x(), l.to.x()))
+        .max()
+        .unwrap()
+        + 1;
+    let max_y = lines
+        .iter()
+        .map(|l| cmp::max(l.from.y(), l.to.y()))
+        .max()
+        .unwrap()
+        + 1;
 
     let mut grid = VecGrid::new();
     for _ in 0..=max_y {
@@ -113,7 +124,7 @@ fn main() {
     }
 
     for line in &lines {
-        if line.from().x() == line.to().x() || line.from().y() == line.to().y() {
+        if !line.is_diagonal() {
             line.draw_on(&mut grid);
         }
     }
@@ -121,12 +132,10 @@ fn main() {
     let part1 = overlapping_points(&grid);
     println!("{}", part1);
 
-    grid = VecGrid::new();
-    for _ in 0..=max_y {
-        grid.add_row(vec![0; max_x]);
-    }
     for line in &lines {
-        line.draw_on(&mut grid);
+        if line.is_diagonal() {
+            line.draw_on(&mut grid);
+        }
     }
 
     let part2 = overlapping_points(&grid);

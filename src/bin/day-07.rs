@@ -1,6 +1,6 @@
 use std::cmp;
-use std::io::prelude::*;
 use std::io;
+use std::io::prelude::*;
 
 fn find_solution<F>(positions: &[u32], fuel_metric: F) -> u32
 where
