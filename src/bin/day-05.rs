@@ -1,17 +1,17 @@
 use aoc2021::commons::{
     geom::Point,
-    grid::{Grid, SparseGrid},
+    grid::{Grid, VecGrid},
     io::load_stdin_lines
 };
-use std::cmp::Ordering;
+use std::cmp::{self, Ordering};
 use std::num::ParseIntError;
 use std::str::FromStr;
 use thiserror::Error;
 
 #[derive(Debug)]
 struct Line {
-    from: Point<isize>,
-    to: Point<isize>,
+    from: Point<usize>,
+    to: Point<usize>,
 }
 
 #[derive(Debug, Error)]
@@ -32,33 +32,35 @@ fn sign(i: isize) -> isize {
 }
 
 impl Line {
-    pub fn from(&self) -> &Point<isize> {
+    pub fn from(&self) -> &Point<usize> {
         &self.from
     }
 
-    pub fn to(&self) -> &Point<isize> {
+    pub fn to(&self) -> &Point<usize> {
         &self.to
     }
 
     pub fn draw_on<T>(&self, grid: &mut T)
     where
-        T: Grid<Coordinate = (isize, isize), Value = isize>,
+        T: Grid<Coordinate = (usize, usize), Value = isize>,
     {
-        let dy = self.to.y() - self.from.y();
-        let dx = self.to.x() - self.from.x();
+        let dy :isize = *self.to.y() as isize - *self.from.y() as isize;
+        let dx  :isize= *self.to.x()  as isize- *self.from.x() as isize;
         let grad = (sign(dx), sign(dy));
 
         let mut point = *self.from();
         while point != *self.to() {
             let coord = (*point.x(), *point.y());
-            let v = grid.at(&coord).unwrap_or(&0);
-            grid.set(coord, v + 1);
-            point += grad;
+            let v = grid.at(&coord).unwrap_or(&0) + 1;
+            grid.set(coord, v);
+            point = Point::new(
+                (*point.x() as isize + grad.0) as usize,
+                (*point.y() as isize + grad.1) as usize);
         }
+        let coord = (*point.x(), *point.y());
+        let v = grid.at(&coord).unwrap_or(&0) + 1;
+        grid.set(coord, v);
 
-        let coord = (*self.to.x(), *self.to.y());
-        let v = grid.at(&coord).unwrap_or(&0);
-        grid.set(coord, v + 1);
     }
 }
 
@@ -69,14 +71,14 @@ impl FromStr for Line {
         let input_string = input.to_string();
         let mut iter = input_string.split_whitespace();
 
-        let from_str: Vec<isize> = iter
+        let from_str: Vec<usize> = iter
             .next()
             .ok_or(LineParseError::MissingField)?
             .split(',')
             .map(|x| x.parse().unwrap())
             .collect();
         let _ = iter.next().ok_or(LineParseError::MissingField)?;
-        let to_str: Vec<isize> = iter
+        let to_str: Vec<usize> = iter
             .next()
             .ok_or(LineParseError::MissingField)?
             .split(',')
@@ -87,21 +89,6 @@ impl FromStr for Line {
             from: Point::new(from_str[0], from_str[1]),
             to: Point::new(to_str[0], to_str[1]),
         })
-    }
-}
-
-fn print_grid(grid: &SparseGrid<isize>) {
-    for y in 0..grid.height() {
-        for x in 0..grid.width() {
-            let coord = (x as isize, y as isize);
-            print!(
-                "{}",
-                grid.at(&coord)
-                    .map(|i| i.to_string())
-                    .unwrap_or_else(|| ".".to_string())
-            );
-        }
-        println!();
     }
 }
 
@@ -117,7 +104,13 @@ fn main() {
         .map(|res| res.unwrap())
         .collect();
 
-    let mut grid = SparseGrid::new();
+    let max_x = lines.iter().map(|l| cmp::max(l.from.x(), l.to.x())).max().unwrap() + 1;
+    let max_y = lines.iter().map(|l| cmp::max(l.from.y(), l.to.y())).max().unwrap() + 1;
+
+    let mut grid = VecGrid::new();
+    for _ in 0..=max_y {
+        grid.add_row(vec![0; max_x]);
+    }
 
     for line in &lines {
         if line.from().x() == line.to().x() || line.from().y() == line.to().y() {
@@ -128,13 +121,12 @@ fn main() {
     let part1 = overlapping_points(&grid);
     println!("{}", part1);
 
-    grid = SparseGrid::new();
-    grid.set((0, 0), 0);
-    grid.set((9, 9), 0);
+    grid = VecGrid::new();
+    for _ in 0..=max_y {
+        grid.add_row(vec![0; max_x]);
+    }
     for line in &lines {
-        //println!("{:?}", line);
         line.draw_on(&mut grid);
-        //print_grid(&grid);
     }
 
     let part2 = overlapping_points(&grid);
