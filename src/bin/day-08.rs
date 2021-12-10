@@ -15,6 +15,7 @@ lazy_static! {
 struct PuzzleInput {
     digits: Vec<HashSet<char>>,
     wanted_numbers: Vec<HashSet<char>>,
+    solution: Option<Vec<u8>>,
 }
 
 impl PuzzleInput {
@@ -22,10 +23,11 @@ impl PuzzleInput {
         Self {
             digits,
             wanted_numbers,
+            solution: None
         }
     }
 
-    pub fn solve(&mut self) -> Vec<u8> {
+    fn actually_solve(&mut self) {
         let mut digit_to_wires = HashMap::new();
 
         let digits = self.digits.clone();
@@ -34,7 +36,7 @@ impl PuzzleInput {
             digit_to_wires.insert(*i as u8, digit.clone());
         }
         let one = digit_to_wires[&1].clone();
-        let mut five_long: Vec<_> = digits.iter().filter(|s| s.len() == 5).collect();
+        let five_long: Vec<_> = digits.iter().filter(|s| s.len() == 5).collect();
 
         let (threes, five_long): (Vec<&HashSet<char>>, Vec<&HashSet<char>>) = five_long
             .iter()
@@ -52,7 +54,7 @@ impl PuzzleInput {
 
             let (nines, zeros): (Vec<&HashSet<char>>, Vec<&HashSet<char>>) = others
                 .iter()
-                .partition(|s| s.difference(&three).count() == 1);
+                .partition(|s| s.difference(three).count() == 1);
             let nine = nines[0];
             digit_to_wires.insert(9, nine.clone());
             let zeros = zeros[0];
@@ -63,7 +65,7 @@ impl PuzzleInput {
 
         let (twos, fives): (Vec<&HashSet<char>>, Vec<&HashSet<char>>) = five_long
             .iter()
-            .partition(|s| s.difference(&six).count() == 1);
+            .partition(|s| s.difference(six).count() == 1);
         digit_to_wires.insert(2, twos[0].clone());
         digit_to_wires.insert(5, fives[0].clone());
 
@@ -73,12 +75,19 @@ impl PuzzleInput {
             wires_to_digit.insert(s, k);
         }
 
-        self.wanted_numbers
+        self.solution = Some(self.wanted_numbers
             .iter()
             .map(|s| s.iter().sorted().collect::<String>())
             .map(|s| wires_to_digit.get(&s).unwrap_or(&u8::MAX))
             .copied()
-            .collect()
+            .collect());
+    }
+
+    pub fn solve(&mut self) -> Vec<u8> {
+        if self.solution.is_none() {
+            self.actually_solve();
+        }
+        self.solution.as_ref().unwrap().clone()
     }
 }
 
