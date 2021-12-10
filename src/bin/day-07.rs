@@ -2,7 +2,7 @@ use std::cmp;
 use std::io::prelude::*;
 use std::io;
 
-fn find_solution<F>(positions: &Vec<u32>, fuel_metric: F) -> u32
+fn find_solution<F>(positions: &[u32], fuel_metric: F) -> u32
 where
     F: Fn(u32, u32) -> u32,
 {
