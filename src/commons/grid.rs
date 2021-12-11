@@ -37,6 +37,18 @@ impl <T> SingleVecGrid<T>
         }
     }
 
+    pub fn from_vecgrid(grid: VecGrid<T>) -> Self {
+        let mut new_grid = SingleVecGrid::new(grid.width(), grid.height());
+        for x in 0..grid.width() {
+            for y in 0..grid.height() {
+                let coord = (x, y);
+                let v = grid.at(&coord).unwrap();
+                new_grid.set(coord, v.clone());
+            }
+        }
+        new_grid
+    }
+
     fn index(&self, x: usize, y: usize) -> Option<usize> {
         if x >= self.width || y >= self.height {
             None
