@@ -20,6 +20,78 @@ trait FullGrid: Grid {
 }
 
 #[derive(Debug, PartialEq, Eq)]
+pub struct SingleVecGrid<T> {
+    values: Vec<T>,
+    width: usize,
+    height: usize,
+}
+
+impl <T> SingleVecGrid<T>
+    where T: Default + Clone
+{
+    pub fn new(width: usize, height: usize) -> Self {
+        Self {
+            values: vec![T::default(); width * height],
+            width,
+            height,
+        }
+    }
+
+    fn index(&self, x: usize, y: usize) -> Option<usize> {
+        if x >= self.width || y >= self.height {
+            None
+        } else {
+            Some(self.width * y + x)
+        }
+    }
+}
+
+impl<T> Grid for SingleVecGrid<T>
+    where T: Default + Clone
+{
+    type Value = T;
+    type Coordinate = (usize, usize);
+
+    fn height(&self) -> usize {
+        self.height
+    }
+
+    fn width(&self) -> usize {
+        self.width
+    }
+
+    fn at(&self, coord: &Self::Coordinate) -> Option<&T> {
+        let (x, y) = coord;
+        self.index(*x, *y).map(|i| &self.values[i])
+    }
+
+    fn set(&mut self, coord: Self::Coordinate, value: T) {
+        let (x, y) = coord;
+
+        match self.index(x, y) {
+            Some(i) => self.values[i] = value,
+            None => panic!("Setting value outside of grid"),
+        }
+    }
+
+    fn points(&self) -> Vec<(Self::Coordinate, &Self::Value)> {
+        self.values
+            .iter()
+            .enumerate()
+            .map(|(i, value)| {
+                let x = i % self.width;
+                let y = i / self.width;
+                ((x, y), value)
+            })
+            .collect()
+    }
+
+    fn from_rows(source: impl IntoIterator<Item = impl IntoIterator<Item = T>>) -> Self {
+        panic!("Not implemented");
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub struct VecGrid<T> {
     rows: Vec<Vec<T>>,
     width: Option<usize>,

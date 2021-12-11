@@ -1,6 +1,6 @@
 use aoc2021::commons::{
     geom::Point,
-    grid::{Grid, VecGrid},
+    grid::{Grid, SingleVecGrid},
     io::load_stdin_lines,
 };
 use std::cmp::{self, Ordering};
@@ -118,10 +118,7 @@ fn main() {
         .unwrap()
         + 1;
 
-    let mut grid = VecGrid::new();
-    for _ in 0..=max_y {
-        grid.add_row(vec![0; max_x]);
-    }
+    let mut grid = SingleVecGrid::new(max_x, max_y);
 
     for line in &lines {
         if !line.is_diagonal() {
