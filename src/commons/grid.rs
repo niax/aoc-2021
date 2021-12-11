@@ -26,8 +26,9 @@ pub struct SingleVecGrid<T> {
     height: usize,
 }
 
-impl <T> SingleVecGrid<T>
-    where T: Default + Clone
+impl<T> SingleVecGrid<T>
+where
+    T: Default + Clone,
 {
     pub fn new(width: usize, height: usize) -> Self {
         Self {
@@ -59,7 +60,8 @@ impl <T> SingleVecGrid<T>
 }
 
 impl<T> Grid for SingleVecGrid<T>
-    where T: Default + Clone
+where
+    T: Default + Clone,
 {
     type Value = T;
     type Coordinate = (usize, usize);
@@ -98,7 +100,7 @@ impl<T> Grid for SingleVecGrid<T>
             .collect()
     }
 
-    fn from_rows(source: impl IntoIterator<Item = impl IntoIterator<Item = T>>) -> Self {
+    fn from_rows(_: impl IntoIterator<Item = impl IntoIterator<Item = T>>) -> Self {
         panic!("Not implemented");
     }
 }
