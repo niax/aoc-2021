@@ -88,9 +88,21 @@ fn main() {
     }
 
     let mut part1 = 0;
-    for _ in 0..100 {
+    let mut part2 = 0;
+    for i in 0..u16::MAX {
         step(&mut grid);
-        part1 += count_flashes(&grid);
+        let flash_count = count_flashes(&grid);
+
+        if i < 100 {
+            part1 += flash_count
+        }
+        if flash_count == 100 {
+            part2 = i + 1;
+        }
+        if part1 != 0 && part2 != 0 {
+            break;
+        }
     }
     println!("{}", part1);
+    println!("{}", part2);
 }
