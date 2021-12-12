@@ -1,7 +1,7 @@
 use aoc2021::commons::io::load_stdin_lines;
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use std::collections::{HashMap, HashSet};
+use hashbrown::{HashMap, HashSet};
 use std::str::FromStr;
 use thiserror::Error;
 

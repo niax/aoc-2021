@@ -1,5 +1,5 @@
 use std::cmp;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 use bitvec::prelude::*;
 
 pub trait Grid {

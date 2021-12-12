@@ -1,6 +1,6 @@
 use aoc2021::commons::io::load_stdin_lines;
 use petgraph::graph::{Graph, NodeIndex, UnGraph};
-use std::collections::HashMap;
+use hashbrown::HashMap;
 use bitvec::prelude::*;
 
 #[derive(Debug, Hash, Clone, Eq, PartialEq)]
