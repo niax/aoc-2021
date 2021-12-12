@@ -25,23 +25,26 @@ fn find_paths(
     if graph.node_weight(current).unwrap().name == "end" {
         1
     } else {
-        graph.neighbors(current).map( |neigh| {
-            let mut inner_twice = visited_twice;
-            let cave = graph.node_weight(neigh).unwrap();
-            if cave.small {
-                if visited_small.contains(cave) {
-                    if inner_twice || cave.name == "start" {
-                        return 0;
+        graph
+            .neighbors(current)
+            .map(|neigh| {
+                let mut inner_twice = visited_twice;
+                let cave = graph.node_weight(neigh).unwrap();
+                if cave.small {
+                    if visited_small.contains(cave) {
+                        if inner_twice || cave.name == "start" {
+                            return 0;
+                        }
+                        inner_twice = true;
                     }
-                    inner_twice = true;
+                    let mut visited_clone = visited_small.clone();
+                    visited_clone.insert(cave.clone());
+                    find_paths(graph, neigh, &visited_clone, inner_twice)
+                } else {
+                    find_paths(graph, neigh, visited_small, inner_twice)
                 }
-                let mut visited_clone = visited_small.clone();
-                visited_clone.insert(cave.clone());
-                find_paths(graph, neigh, &visited_clone, inner_twice)
-            } else {
-                find_paths(graph, neigh, visited_small, inner_twice)
-            }
-        }).sum()
+            })
+            .sum()
     }
 }
 
