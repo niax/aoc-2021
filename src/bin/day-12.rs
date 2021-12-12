@@ -1,6 +1,7 @@
 use aoc2021::commons::io::load_stdin_lines;
 use petgraph::graph::{Graph, NodeIndex, UnGraph};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+use bitvec::prelude::*;
 
 #[derive(Debug, Hash, Clone, Eq, PartialEq)]
 struct Cave {
@@ -19,7 +20,7 @@ impl Cave {
 fn find_paths(
     graph: &UnGraph<Cave, ()>,
     current: NodeIndex<u32>,
-    visited_small: &HashSet<Cave>,
+    visited_small: &BitVec,
     visited_twice: bool,
 ) -> u32 {
     if graph.node_weight(current).unwrap().name == "end" {
@@ -31,14 +32,14 @@ fn find_paths(
                 let mut inner_twice = visited_twice;
                 let cave = graph.node_weight(neigh).unwrap();
                 if cave.small {
-                    if visited_small.contains(cave) {
+                    if visited_small[neigh.index()] {
                         if inner_twice || cave.name == "start" {
                             return 0;
                         }
                         inner_twice = true;
                     }
                     let mut visited_clone = visited_small.clone();
-                    visited_clone.insert(cave.clone());
+                    *visited_clone.get_mut(neigh.index()).unwrap() = true;
                     find_paths(graph, neigh, &visited_clone, inner_twice)
                 } else {
                     find_paths(graph, neigh, visited_small, inner_twice)
@@ -65,8 +66,8 @@ fn main() {
     }
 
     let start = node_ids["start"];
-    let mut visited = HashSet::new();
-    visited.insert(graph.node_weight(start).unwrap().clone());
+    let mut visited = bitvec![0; node_ids.len()];
+    *visited.get_mut(start.index()).unwrap() = true;
     let part1 = find_paths(&graph, start, &visited, true);
     println!("{}", part1);
 
