@@ -7,13 +7,17 @@ use bitvec::prelude::*;
 struct Cave {
     name: String,
     small: bool,
+    start: bool,
+    end: bool,
 }
 
 impl Cave {
     pub fn parse(s: String) -> Self {
         let small = s.to_lowercase() == s;
+        let start = s == "start";
+        let end = s == "end";
 
-        Self { name: s, small }
+        Self { name: s, small, start, end }
     }
 }
 
@@ -23,7 +27,7 @@ fn find_paths(
     visited_small: &BitVec,
     visited_twice: bool,
 ) -> u32 {
-    if graph.node_weight(current).unwrap().name == "end" {
+    if graph.node_weight(current).unwrap().end {
         1
     } else {
         graph
@@ -33,7 +37,7 @@ fn find_paths(
                 let cave = graph.node_weight(neigh).unwrap();
                 if cave.small {
                     if visited_small[neigh.index()] {
-                        if inner_twice || cave.name == "start" {
+                        if inner_twice || cave.start {
                             return 0;
                         }
                         inner_twice = true;
