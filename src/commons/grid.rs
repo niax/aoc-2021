@@ -1,5 +1,6 @@
 use std::cmp;
 use std::collections::HashMap;
+use bitvec::prelude::*;
 
 pub trait Grid {
     type Value;
@@ -17,6 +18,70 @@ pub trait Grid {
 trait FullGrid: Grid {
     fn row_for_point(p: &Self::Coordinate) -> usize;
     fn column_for_point(p: &Self::Coordinate) -> usize;
+}
+
+pub struct BitGrid {
+    values: BitVec,
+    width: usize,
+    height: usize,
+}
+
+impl BitGrid {
+    pub fn new(width: usize, height: usize) -> Self {
+        Self {
+            values: bitvec![0; width * height],
+            width,
+            height,
+        }
+    }
+
+    fn index(&self, x: usize, y: usize) -> Option<usize> {
+        if x >= self.width || y >= self.height {
+            None
+        } else {
+            Some(self.width * y + x)
+        }
+    }
+
+    pub fn set_cell_count(&self) -> usize {
+        self.values.count_ones()
+    }
+}
+
+impl Grid for BitGrid
+{
+    type Value = bool;
+    type Coordinate = (usize, usize);
+
+    fn height(&self) -> usize {
+        self.height
+    }
+
+    fn width(&self) -> usize {
+        self.width
+    }
+
+    fn at(&self, coord: &Self::Coordinate) -> Option<&bool> {
+        let (x, y) = coord;
+        self.index(*x, *y).map(|i| &self.values[i])
+    }
+
+    fn set(&mut self, coord: Self::Coordinate, value: bool) {
+        let (x, y) = coord;
+
+        match self.index(x, y) {
+            Some(i) => *self.values.get_mut(i).unwrap() = value,
+            None => panic!("Setting value outside of grid"),
+        }
+    }
+
+    fn points(&self) -> Vec<(Self::Coordinate, &Self::Value)> {
+        panic!("Not implemented");
+    }
+
+    fn from_rows(_: impl IntoIterator<Item = impl IntoIterator<Item = bool>>) -> Self {
+        panic!("Not implemented");
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]

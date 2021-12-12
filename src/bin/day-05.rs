@@ -1,6 +1,6 @@
 use aoc2021::commons::{
     geom::Point,
-    grid::{Grid, SingleVecGrid},
+    grid::{Grid, SingleVecGrid, BitGrid},
     io::load_stdin_lines,
 };
 use std::cmp::{self, Ordering};
@@ -44,9 +44,10 @@ impl Line {
         !(self.from().x() == self.to().x() || self.from().y() == self.to().y())
     }
 
-    pub fn draw_on<T>(&self, grid: &mut T)
+    pub fn draw_on<T, D>(&self, grid: &mut T, danger: &mut D)
     where
         T: Grid<Coordinate = (usize, usize), Value = isize>,
+        D: Grid<Coordinate = (usize, usize), Value = bool>,
     {
         let dy: isize = *self.to.y() as isize - *self.from.y() as isize;
         let dx: isize = *self.to.x() as isize - *self.from.x() as isize;
@@ -57,12 +58,18 @@ impl Line {
         while (x, y) != (*self.to().x(), *self.to().y()) {
             let coord = (x, y);
             let v = grid.at(&coord).unwrap_or(&0) + 1;
+            if v > 1 {
+                danger.set(coord.clone(), true);
+            }
             grid.set(coord, v);
             x = (x as isize + grad.0) as usize;
             y = (y as isize + grad.1) as usize;
         }
         let coord = (x, y);
         let v = grid.at(&(x, y)).unwrap_or(&0) + 1;
+        if v > 1 {
+            danger.set(coord.clone(), true);
+        }
         grid.set(coord, v);
     }
 }
@@ -95,13 +102,6 @@ impl FromStr for Line {
     }
 }
 
-fn overlapping_points<T, C>(grid: &T) -> usize
-where
-    T: Grid<Coordinate = C, Value = isize>,
-{
-    grid.points().iter().filter(|(_, v)| **v > 1).count()
-}
-
 fn main() {
     let lines: Vec<Line> = load_stdin_lines().map(|res| res.unwrap()).collect();
 
@@ -119,22 +119,23 @@ fn main() {
         + 1;
 
     let mut grid = SingleVecGrid::new(max_x, max_y);
+    let mut danger = BitGrid::new(max_x, max_y);
 
     for line in &lines {
         if !line.is_diagonal() {
-            line.draw_on(&mut grid);
+            line.draw_on(&mut grid, &mut danger);
         }
     }
 
-    let part1 = overlapping_points(&grid);
+    let part1 = danger.set_cell_count();
     println!("{}", part1);
 
     for line in &lines {
         if line.is_diagonal() {
-            line.draw_on(&mut grid);
+            line.draw_on(&mut grid, &mut danger);
         }
     }
 
-    let part2 = overlapping_points(&grid);
+    let part2 = danger.set_cell_count();
     println!("{}", part2);
 }
