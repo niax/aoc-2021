@@ -19,15 +19,14 @@ impl Cave {
 fn find_paths(
     graph: &UnGraph<Cave, ()>,
     current: NodeIndex<u32>,
-    visited_small: HashSet<Cave>,
-    visisted_twice: bool,
+    visited_small: &HashSet<Cave>,
+    visited_twice: bool,
 ) -> u32 {
     if graph.node_weight(current).unwrap().name == "end" {
         1
     } else {
         graph.neighbors(current).map( |neigh| {
-            let mut inner_twice = visisted_twice;
-            let mut new_visited = visited_small.clone();
+            let mut inner_twice = visited_twice;
             let cave = graph.node_weight(neigh).unwrap();
             if cave.small {
                 if visited_small.contains(cave) {
@@ -36,9 +35,12 @@ fn find_paths(
                     }
                     inner_twice = true;
                 }
-                new_visited.insert(cave.clone());
+                let mut visited_clone = visited_small.clone();
+                visited_clone.insert(cave.clone());
+                find_paths(graph, neigh, &visited_clone, inner_twice)
+            } else {
+                find_paths(graph, neigh, visited_small, inner_twice)
             }
-            find_paths(graph, neigh, new_visited, inner_twice)
         }).sum()
     }
 }
@@ -62,9 +64,9 @@ fn main() {
     let start = node_ids["start"];
     let mut visited = HashSet::new();
     visited.insert(graph.node_weight(start).unwrap().clone());
-    let part1 = find_paths(&graph, start, visited.clone(), true);
+    let part1 = find_paths(&graph, start, &visited, true);
     println!("{}", part1);
 
-    let part2 = find_paths(&graph, start, visited, false);
+    let part2 = find_paths(&graph, start, &visited, false);
     println!("{}", part2);
 }
