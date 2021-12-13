@@ -1,7 +1,7 @@
 use aoc2021::commons::io::load_stdin_lines;
-use petgraph::graph::{Graph, NodeIndex, UnGraph};
-use hashbrown::HashMap;
 use bitvec::prelude::*;
+use petgraph::graph::{Graph, NodeIndex, UnGraph};
+use std::collections::HashMap;
 
 #[derive(Debug, Hash, Clone, Eq, PartialEq)]
 struct Cave {
@@ -17,7 +17,12 @@ impl Cave {
         let start = s == "start";
         let end = s == "end";
 
-        Self { name: s, small, start, end }
+        Self {
+            name: s,
+            small,
+            start,
+            end,
+        }
     }
 }
 

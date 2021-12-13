@@ -1,6 +1,6 @@
-use std::cmp;
-use hashbrown::HashMap;
 use bitvec::prelude::*;
+use std::cmp;
+use std::collections::HashMap;
 
 pub trait Grid {
     type Value;
@@ -48,8 +48,7 @@ impl BitGrid {
     }
 }
 
-impl Grid for BitGrid
-{
+impl Grid for BitGrid {
     type Value = bool;
     type Coordinate = (usize, usize);
 

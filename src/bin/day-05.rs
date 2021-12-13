@@ -1,6 +1,6 @@
 use aoc2021::commons::{
     geom::Point,
-    grid::{Grid, SingleVecGrid, BitGrid},
+    grid::{BitGrid, Grid, SingleVecGrid},
     io::load_stdin_lines,
 };
 use std::cmp::{self, Ordering};
@@ -59,7 +59,7 @@ impl Line {
             let coord = (x, y);
             let v = grid.at(&coord).unwrap_or(&0) + 1;
             if v > 1 {
-                danger.set(coord.clone(), true);
+                danger.set(coord, true);
             }
             grid.set(coord, v);
             x = (x as isize + grad.0) as usize;
@@ -68,7 +68,7 @@ impl Line {
         let coord = (x, y);
         let v = grid.at(&(x, y)).unwrap_or(&0) + 1;
         if v > 1 {
-            danger.set(coord.clone(), true);
+            danger.set(coord, true);
         }
         grid.set(coord, v);
     }
