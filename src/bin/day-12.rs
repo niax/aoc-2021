@@ -1,10 +1,11 @@
 use aoc2021::commons::io::load_stdin_lines;
 use bitvec::prelude::*;
+use cached::{cached_key, SizedCache};
 use petgraph::graph::{Graph, NodeIndex, UnGraph};
 use std::collections::HashMap;
 
 #[derive(Debug, Hash, Clone, Eq, PartialEq)]
-struct Cave {
+pub struct Cave {
     name: String,
     small: bool,
     start: bool,
@@ -26,7 +27,19 @@ impl Cave {
     }
 }
 
-fn find_paths(
+cached_key! {
+    PATHS: SizedCache<(usize, BitVec, bool), u32> = SizedCache::with_size(1_000_000);
+    Key = { (current.index(), visited_small.clone(), visited_twice) };
+    fn find_paths(graph: &UnGraph<Cave, ()>,
+        current: NodeIndex<u32>,
+        visited_small: &BitVec,
+        visited_twice: bool
+    ) -> u32  = {
+        find_paths_actual(graph, current, visited_small, visited_twice)
+    }
+}
+
+fn find_paths_actual(
     graph: &UnGraph<Cave, ()>,
     current: NodeIndex<u32>,
     visited_small: &BitVec,
