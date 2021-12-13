@@ -9,7 +9,9 @@ use std::collections::HashMap;
 lazy_static! {
     static ref LETTERS: HashMap<u32, char> = {
         let mut h = HashMap::new();
+        h.insert(8276255, 'A');
         h.insert(16685654, 'B');
+        h.insert(8001618, 'C');
         h.insert(16685665, 'E');
         h.insert(16681504, 'F');
         h.insert(8001879, 'G');
@@ -17,6 +19,7 @@ lazy_static! {
         h.insert(530558, 'J');
         h.insert(16519233, 'L');
         h.insert(16549281, 'K');
+        h.insert(16664856, 'P');
         h.insert(16664985, 'R');
         h.insert(16257150, 'U');
         h.insert(9329265, 'Z');
@@ -32,6 +35,7 @@ fn decode_letter(g: &BitGrid, offset: usize) -> char {
             letter_bits.push(*g.at(&(x, y)).unwrap());
         }
     }
+    //println!("{}", letter_bits.load::<u32>());
     *LETTERS.get(&letter_bits.load::<u32>()).unwrap()
 }
 
