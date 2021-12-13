@@ -2,52 +2,6 @@ use aoc2021::commons::{
     grid::{BitGrid, Grid},
     io::load_stdin_lines,
 };
-use bitvec::prelude::*;
-use lazy_static::lazy_static;
-use std::collections::HashMap;
-
-lazy_static! {
-    static ref LETTERS: HashMap<u32, char> = {
-        let mut h = HashMap::new();
-        h.insert(8276255, 'A');
-        h.insert(16685654, 'B');
-        h.insert(8001618, 'C');
-        h.insert(16685665, 'E');
-        h.insert(16681504, 'F');
-        h.insert(8001879, 'G');
-        h.insert(16548415, 'H');
-        h.insert(530558, 'J');
-        h.insert(16519233, 'L');
-        h.insert(16549281, 'K');
-        h.insert(16664856, 'P');
-        h.insert(16664985, 'R');
-        h.insert(16257150, 'U');
-        h.insert(9329265, 'Z');
-        h
-    };
-}
-
-fn decode_letter(g: &BitGrid, offset: usize) -> char {
-    let mut letter_bits = BitVec::<Msb0, u32>::with_capacity(32);
-    for x in 0..4 {
-        let x = offset * 5 + x;
-        for y in 0..6 {
-            letter_bits.push(*g.at(&(x, y)).unwrap());
-        }
-    }
-    //println!("{}", letter_bits.load::<u32>());
-    *LETTERS.get(&letter_bits.load::<u32>()).unwrap()
-}
-
-#[allow(dead_code)]
-fn print_grid(g: &BitGrid) {
-    for y in 0..g.height() {
-        let row = (0..g.width())
-            .map(|x| if *g.at(&(x, y)).unwrap() { '#' } else { ' ' })
-            .collect::<String>();
-        println!("{}", row);
-    }
-}
 
 enum Fold {
     X(usize),
@@ -125,8 +79,6 @@ fn main() {
         }
     }
     let grid = render_points(&points);
-    let decoded = (0..8).map(|i| decode_letter(&grid, i)).collect::<String>();
-    println!("{}", decoded);
-
-    print_grid(&grid);
+    println!("{}", grid.decode_string());
+    grid.print('#', ' ');
 }

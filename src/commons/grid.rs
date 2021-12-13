@@ -1,6 +1,41 @@
 use bitvec::prelude::*;
+use lazy_static::lazy_static;
 use std::cmp;
 use std::collections::HashMap;
+
+lazy_static! {
+    static ref LETTERS: HashMap<u32, char> = {
+        let mut h = HashMap::new();
+        h.insert(529680320, 'A');
+        h.insert(1067881856, 'B');
+        h.insert(512103552, 'C');
+        h.insert(1065752448, 'D');
+        h.insert(1067882560, 'E');
+        h.insert(1067616256, 'F');
+        h.insert(512120256, 'G');
+        h.insert(1059098560, 'H');
+        h.insert(8910912, 'I');
+        h.insert(33955712, 'J');
+        h.insert(1059153984, 'K');
+        h.insert(1057230912, 'L');
+        h.insert(0, 'M');
+        h.insert(1059082176, 'N');
+        h.insert(512104320, 'O');
+        h.insert(1066550784, 'P');
+        h.insert(0, 'Q');
+        h.insert(1066559040, 'R');
+        h.insert(429283456, 'S');
+        h.insert(0, 'T');
+        h.insert(1040457600, 'U');
+        h.insert(941101496, 'V');
+        h.insert(0, 'W');
+        h.insert(0, 'X');
+        h.insert(807432752, 'Y');
+        h.insert(597072960, 'Z');
+        h.insert(0, ' ');
+        h
+    };
+}
 
 pub trait Grid {
     type Value;
@@ -45,6 +80,35 @@ impl BitGrid {
 
     pub fn set_cell_count(&self) -> usize {
         self.values.count_ones()
+    }
+
+    pub fn print(&self, true_val: char, false_val: char) {
+        for y in 0..self.height() {
+            let row = (0..self.width())
+                .map(|x| if *self.at(&(x, y)).unwrap() { true_val } else { false_val })
+                .collect::<String>();
+            println!("{}", row);
+        }
+    }
+
+    pub fn decode_string(&self) -> String {
+        let font_width = 5;
+        let font_height = 6;
+        let mut x = 0;
+        let mut s = String::new();
+        while (x + font_width) <= self.width() + 1 {
+            let mut letter_bits = BitVec::<Msb0, u32>::with_capacity(32);
+            for xd in 0..font_width {
+                let x = xd + x;
+                for y in 0..font_height {
+                    letter_bits.push(*self.at(&(x, y)).unwrap_or(&false));
+                }
+            }
+            let c = *LETTERS.get(&letter_bits.load::<u32>()).unwrap_or(&'?');
+            s.push(c);
+            x += font_width;
+        }
+        s
     }
 }
 
