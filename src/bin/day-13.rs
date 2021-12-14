@@ -80,5 +80,4 @@ fn main() {
     }
     let grid = render_points(&points);
     println!("{}", grid.decode_string());
-    grid.print('#', ' ');
 }
