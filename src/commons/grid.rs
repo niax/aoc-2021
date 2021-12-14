@@ -85,7 +85,13 @@ impl BitGrid {
     pub fn print(&self, true_val: char, false_val: char) {
         for y in 0..self.height() {
             let row = (0..self.width())
-                .map(|x| if *self.at(&(x, y)).unwrap() { true_val } else { false_val })
+                .map(|x| {
+                    if *self.at(&(x, y)).unwrap() {
+                        true_val
+                    } else {
+                        false_val
+                    }
+                })
                 .collect::<String>();
             println!("{}", row);
         }
