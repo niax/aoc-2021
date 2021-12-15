@@ -1,5 +1,5 @@
 use aoc2021::commons::{
-    grid::{BitGrid, Grid, SingleVecGrid},
+    grid::{Grid, SingleVecGrid},
     io::load_stdin_lines,
 };
 use lazy_static::lazy_static;
@@ -107,7 +107,7 @@ impl CaveGrid {
 
 fn find_risk(grid: &CaveGrid) -> u32 {
     let end = (grid.width() - 1, grid.height() - 1);
-    let mut visited = BitGrid::new(grid.width(), grid.height());
+    let mut visited = SingleVecGrid::new(grid.width(), grid.height());
     let mut queue = BinaryHeap::new();
     queue.push(PathItem {
         coord: (0, 0),
@@ -116,19 +116,23 @@ fn find_risk(grid: &CaveGrid) -> u32 {
 
     while !queue.is_empty() {
         let item = queue.pop().unwrap();
-        if *visited.at(&item.coord).unwrap() {
-            continue;
-        }
         if item.coord == end {
             return item.risk;
         }
         for (coord, risk) in grid.adjacent(item.coord) {
-            queue.push(PathItem {
-                coord,
-                risk: risk + item.risk,
-            });
+            let risk_to_here = risk + item.risk;
+
+            let v = visited.at(&coord).unwrap();
+
+            if *v == 0 || *v > risk_to_here {
+                visited.set(coord, risk_to_here);
+                queue.push(PathItem {
+                    coord,
+                    risk: risk_to_here,
+                });
+            }
+
         }
-        visited.set(item.coord, true);
     }
     panic!("Didn't get to the end!");
 }
