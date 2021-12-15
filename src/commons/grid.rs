@@ -35,6 +35,7 @@ lazy_static! {
         h.insert(0, ' ');
         h
     };
+    static ref ADJACENT: Vec<(isize, isize)> = vec![(0, -1), (0, 1), (1, 0), (-1, 0)];
 }
 
 pub trait Grid {
@@ -182,6 +183,19 @@ where
             }
         }
         new_grid
+    }
+
+    pub fn adjacent(&self, coord: (usize, usize)) -> impl Iterator<Item = ((usize, usize), &T)> {
+        ADJACENT
+            .iter()
+            .map(move |off| (coord.0 as isize + off.0, coord.1 as isize + off.1))
+            .filter(|(x, y)| {
+                *x >= 0 && *x < self.width() as isize && *y >= 0 && *y < self.height() as isize
+            })
+            .map(|(x, y)| {
+                let coord = (x as usize, y as usize);
+                (coord, self.at(&coord).unwrap())
+            })
     }
 
     fn index(&self, x: usize, y: usize) -> Option<usize> {
