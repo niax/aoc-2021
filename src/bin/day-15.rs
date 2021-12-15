@@ -5,7 +5,7 @@ use aoc2021::commons::{
 use lazy_static::lazy_static;
 use std::cell::RefCell;
 use std::cmp::Ordering;
-use std::collections::{binary_heap::BinaryHeap, HashMap};
+use std::collections::binary_heap::BinaryHeap;
 
 lazy_static! {
     static ref ADJACENT: Vec<(isize, isize)> = vec![(0, -1), (0, 1), (1, 0), (-1, 0)];
@@ -29,43 +29,42 @@ impl PartialOrd for PathItem {
     }
 }
 
-struct GridOfGrids {
-    grids: RefCell<HashMap<(usize, usize), SingleVecGrid<u32>>>,
-    width: usize,
-    height: usize,
+struct CaveGrid {
+    grid: RefCell<SingleVecGrid<Option<u32>>>,
     inner_width: usize,
     inner_height: usize,
 }
 
-impl GridOfGrids {
-    pub fn new(original: SingleVecGrid<u32>, width: usize, height: usize) -> Self {
-        let mut grids = HashMap::new();
+impl CaveGrid {
+    pub fn new(original: &SingleVecGrid<u32>, width: usize, height: usize) -> Self {
         let inner_width = original.width();
         let inner_height = original.height();
-        grids.insert((0, 0), original);
+        let mut grid = SingleVecGrid::new(inner_width * width, inner_height * height);
+        for x in 0..original.width() {
+            for y in 0..original.height() {
+                grid.set((x, y), Some(*original.at(&(x, y)).unwrap()));
+            }
+        }
         Self {
-            grids: RefCell::new(grids),
-            width,
-            height,
+            grid: RefCell::new(grid),
             inner_width,
             inner_height,
         }
     }
 
     pub fn width(&self) -> usize {
-        self.width * self.inner_width
+        self.grid.borrow().width()
     }
 
     pub fn height(&self) -> usize {
-        self.height * self.inner_height
+        self.grid.borrow().height()
     }
 
     pub fn at(&self, coord: &(usize, usize)) -> Option<u32> {
-        let grid_x = coord.0 / self.inner_width;
-        let grid_y = coord.1 / self.inner_height;
-        let grid_coord = (grid_x, grid_y);
-
-        if !self.grids.borrow().contains_key(&grid_coord) {
+        if self.grid.borrow().at(coord).unwrap().is_none() {
+            // Figure out which subgrid we're in
+            let grid_x = coord.0 / self.inner_width;
+            let grid_y = coord.1 / self.inner_height;
             let copy_from = if grid_x >= 1 {
                 (grid_x - 1, grid_y)
             } else {
@@ -73,31 +72,20 @@ impl GridOfGrids {
             };
             let read_from_x = copy_from.0 * self.inner_width;
             let read_from_y = copy_from.1 * self.inner_width;
-            let mut new_grid = SingleVecGrid::new(self.inner_width, self.inner_height);
+            let subgrid_x = coord.0 % self.inner_width;
+            let subgrid_y = coord.1 % self.inner_height;
 
-            for x in 0..self.inner_width {
-                let read_x = read_from_x + x;
-                for y in 0..self.inner_height {
-                    let read_y = read_from_y + y;
-                    let mut v = self.at(&(read_x, read_y)).unwrap() + 1;
-                    if v > 9 {
-                        v = 1;
-                    }
-                    new_grid.set((x, y), v);
-                }
+            let mut v = self
+                .at(&(read_from_x + subgrid_x, read_from_y + subgrid_y))
+                .unwrap()
+                + 1;
+            if v > 9 {
+                v = 1;
             }
-
-            self.grids.borrow_mut().insert(grid_coord, new_grid);
+            self.grid.borrow_mut().set(*coord, Some(v));
         }
 
-        let x = coord.0 % self.inner_width;
-        let y = coord.1 % self.inner_height;
-        self.grids
-            .borrow()
-            .get(&(grid_coord))
-            .unwrap()
-            .at(&(x, y))
-            .copied()
+        *self.grid.borrow().at(coord).unwrap()
     }
 
     pub fn adjacent(
@@ -117,7 +105,8 @@ impl GridOfGrids {
     }
 }
 
-fn find_risk(grid: &GridOfGrids, end: (usize, usize)) -> u32 {
+fn find_risk(grid: &CaveGrid) -> u32 {
+    let end = (grid.width() - 1, grid.height() - 1);
     let mut visited = BitGrid::new(grid.width(), grid.height());
     let mut queue = BinaryHeap::new();
     queue.push(PathItem {
@@ -161,21 +150,9 @@ fn main() {
         }
     }
 
-    let grid_o_grids = GridOfGrids::new(grid, 5, 5);
+    let part1 = CaveGrid::new(&grid, 1, 1);
+    println!("{}", find_risk(&part1));
 
-    println!(
-        "{}",
-        find_risk(
-            &grid_o_grids,
-            (grid_o_grids.inner_width - 1, grid_o_grids.inner_height - 1)
-        )
-    );
-
-    println!(
-        "{}",
-        find_risk(
-            &grid_o_grids,
-            (grid_o_grids.width() - 1, grid_o_grids.height() - 1)
-        )
-    );
+    let part2 = CaveGrid::new(&grid, 5, 5);
+    println!("{}", find_risk(&part2,));
 }

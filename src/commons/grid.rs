@@ -253,6 +253,19 @@ where
     }
 }
 
+impl<T> Clone for SingleVecGrid<T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            values: self.values.clone(),
+            width: self.width,
+            height: self.height,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct VecGrid<T> {
     rows: Vec<Vec<T>>,
