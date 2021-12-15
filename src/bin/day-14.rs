@@ -70,7 +70,7 @@ fn main() {
             let mut rule = a.chars();
             rules.insert(
                 (rule.next().unwrap(), rule.next().unwrap()),
-                b.chars().nth(0).unwrap(),
+                b.chars().next().unwrap(),
             );
         }
     }
