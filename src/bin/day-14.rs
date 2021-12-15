@@ -1,16 +1,58 @@
 use aoc2021::commons::io::load_stdin_lines;
 use std::collections::HashMap;
 
-fn answer(v: &HashMap<(char, char), u128>) {
-    let mut counts = HashMap::new();
-    for (pair, count) in v {
-        *counts.entry(pair.0).or_insert(0) += count;
-        *counts.entry(pair.1).or_insert(0) += count;
+fn minmax<T, I>(iter: I) -> Option<(T, T)>
+where
+    T: std::cmp::Ord + Copy,
+    I: std::iter::IntoIterator<Item = T>,
+{
+    let mut min = None;
+    let mut max = None;
+
+    for i in iter {
+        if min.is_none() {
+            min = Some(i);
+            max = Some(i);
+        }
+
+        min = Some(std::cmp::min(min.unwrap(), i));
+        max = Some(std::cmp::max(max.unwrap(), i));
     }
-    counts.remove(&'_');
-    let min = counts.iter().map(|(_, c)| c).min().unwrap();
-    let max = counts.iter().map(|(_, c)| c).max().unwrap();
-    println!("{}", (max - min) / 2);
+
+    min.map(|m| (m, max.unwrap()))
+}
+
+#[derive(Debug)]
+struct HashCounter<T> {
+    inner: HashMap<T, u128>,
+}
+
+impl<T> HashCounter<T>
+where
+    T: Eq + std::hash::Hash,
+{
+    pub fn new() -> Self {
+        Self {
+            inner: HashMap::new(),
+        }
+    }
+
+    pub fn count(&mut self, value: T) {
+        self.countn(value, 1);
+    }
+
+    pub fn countn(&mut self, value: T, n: u128) {
+        *self.inner.entry(value).or_insert(0) += n;
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&T, &u128)> {
+        self.inner.iter()
+    }
+}
+
+fn answer(counter: &HashCounter<char>) {
+    let (min, max) = minmax(counter.iter().map(|(_, c)| c)).unwrap();
+    println!("{}", (max - min));
 }
 
 fn main() {
@@ -32,9 +74,11 @@ fn main() {
             );
         }
     }
-    // Wrap the template in _ to handle the pairwise addition later
-    template.insert(0, '_');
-    template.push('_');
+
+    let mut char_counts = HashCounter::new();
+    for c in &template {
+        char_counts.count(*c);
+    }
 
     let mut pair_counts = HashMap::<(char, char), u128>::new();
     for pair in template.windows(2) {
@@ -46,6 +90,7 @@ fn main() {
         for (pair, count) in pair_counts {
             match rules.get(&pair) {
                 Some(insert) => {
+                    char_counts.countn(*insert, count);
                     let first = next.entry((pair.0, *insert)).or_insert(0);
                     *first += count;
                     let second = next.entry((*insert, pair.1)).or_insert(0);
@@ -58,8 +103,8 @@ fn main() {
         }
         pair_counts = next;
         if i == 10 {
-            answer(&pair_counts);
+            answer(&char_counts);
         }
     }
-    answer(&pair_counts);
+    answer(&char_counts);
 }
