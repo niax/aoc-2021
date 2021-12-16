@@ -68,7 +68,6 @@ fn expand_grid(original: SingleVecGrid<u32>, factor: usize) -> SingleVecGrid<u32
     grid
 }
 
-
 fn find_risk(grid: &SingleVecGrid<u32>) -> u32 {
     let end = (grid.width() - 1, grid.height() - 1);
     let mut visited = SingleVecGrid::new(grid.width(), grid.height());
@@ -95,7 +94,6 @@ fn find_risk(grid: &SingleVecGrid<u32>) -> u32 {
                     risk: risk_to_here,
                 });
             }
-
         }
     }
     panic!("Didn't get to the end!");
