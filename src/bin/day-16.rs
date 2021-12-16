@@ -1,5 +1,6 @@
 use aoc2021::commons::io::load_stdin_lines;
 use bitvec::prelude::*;
+use std::cmp::Ordering;
 
 #[derive(Debug)]
 struct BitReader {
@@ -61,6 +62,33 @@ impl Packet {
             }
         }
     }
+
+    pub fn eval(&self) -> u128 {
+        match self {
+            Packet::Literal(_, val) => *val,
+            Packet::Command(_, op, ref sub) => {
+                let mut vals = sub.iter().map(|p| p.eval());
+                match op {
+                    0 => vals.sum(),
+                    1 => vals.product(),
+                    2 => vals.min().unwrap(),
+                    3 => vals.max().unwrap(),
+                    5 | 6 | 7 => {
+                        let a = vals.next().unwrap();
+                        let b = vals.next().unwrap();
+                        let c = a.cmp(&b);
+                        match (op, c) {
+                            (5, Ordering::Greater) => 1,
+                            (6, Ordering::Less) => 1,
+                            (7, Ordering::Equal) => 1,
+                            _ => 0,
+                        }
+                    }
+                    _ => panic!("Unknown op {}", op),
+                }
+            }
+        }
+    }
 }
 
 fn read_packet(reader: &mut BitReader) -> Packet {
@@ -119,8 +147,8 @@ fn main() {
         let d = c.to_digit(16).unwrap();
         reader.push(d as u8, 4);
     }
-    let packets = read_packets(&mut reader);
-    println!("{:?}", packets);
-    let version_sum = packets.iter().map(|p| p.version_sum()).sum::<u128>();
-    println!("{}", version_sum);
+    let packet = read_packet(&mut reader);
+    println!("{:?}", packet);
+    println!("{}", packet.version_sum());
+    println!("{}", packet.eval());
 }
