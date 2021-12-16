@@ -3,7 +3,6 @@ use aoc2021::commons::{
     io::load_stdin_lines,
 };
 use lazy_static::lazy_static;
-use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::binary_heap::BinaryHeap;
 
@@ -29,83 +28,48 @@ impl PartialOrd for PathItem {
     }
 }
 
-struct CaveGrid {
-    grid: RefCell<SingleVecGrid<Option<u32>>>,
-    inner_width: usize,
-    inner_height: usize,
-}
-
-impl CaveGrid {
-    pub fn new(original: &SingleVecGrid<u32>, width: usize, height: usize) -> Self {
-        let inner_width = original.width();
-        let inner_height = original.height();
-        let mut grid = SingleVecGrid::new(inner_width * width, inner_height * height);
+fn expand_grid(original: SingleVecGrid<u32>, factor: usize) -> SingleVecGrid<u32> {
+    let mut grid = SingleVecGrid::new(original.width() * factor, original.height() * factor);
+    for y in 0..original.height() {
         for x in 0..original.width() {
-            for y in 0..original.height() {
-                grid.set((x, y), Some(*original.at(&(x, y)).unwrap()));
+            grid.set((x, y), *original.at(&(x, y)).unwrap());
+        }
+    }
+
+    for y in 0..grid.height() {
+        let grid_y = y / original.height();
+        let subgrid_y = y % original.height();
+        for x in 0..grid.width() {
+            if *grid.at(&(x, y)).unwrap() != 0 {
+                continue;
             }
-        }
-        Self {
-            grid: RefCell::new(grid),
-            inner_width,
-            inner_height,
-        }
-    }
-
-    pub fn width(&self) -> usize {
-        self.grid.borrow().width()
-    }
-
-    pub fn height(&self) -> usize {
-        self.grid.borrow().height()
-    }
-
-    pub fn at(&self, coord: &(usize, usize)) -> Option<u32> {
-        if self.grid.borrow().at(coord).unwrap().is_none() {
             // Figure out which subgrid we're in
-            let grid_x = coord.0 / self.inner_width;
-            let grid_y = coord.1 / self.inner_height;
+            let grid_x = x / original.width();
             let copy_from = if grid_x >= 1 {
                 (grid_x - 1, grid_y)
             } else {
                 (grid_x, grid_y - 1)
             };
-            let read_from_x = copy_from.0 * self.inner_width;
-            let read_from_y = copy_from.1 * self.inner_width;
-            let subgrid_x = coord.0 % self.inner_width;
-            let subgrid_y = coord.1 % self.inner_height;
+            let read_from_x = copy_from.0 * original.width();
+            let read_from_y = copy_from.1 * original.height();
+            let subgrid_x = x % original.width();
 
-            let mut v = self
+            let mut v = grid
                 .at(&(read_from_x + subgrid_x, read_from_y + subgrid_y))
                 .unwrap()
                 + 1;
             if v > 9 {
                 v = 1;
             }
-            self.grid.borrow_mut().set(*coord, Some(v));
+            grid.set((x, y), v);
         }
-
-        *self.grid.borrow().at(coord).unwrap()
     }
 
-    pub fn adjacent(
-        &self,
-        coord: (usize, usize),
-    ) -> impl Iterator<Item = ((usize, usize), u32)> + '_ {
-        ADJACENT
-            .iter()
-            .map(move |off| (coord.0 as isize + off.0, coord.1 as isize + off.1))
-            .filter(|(x, y)| {
-                *x >= 0 && *x < self.width() as isize && *y >= 0 && *y < self.height() as isize
-            })
-            .map(|(x, y)| {
-                let coord = (x as usize, y as usize);
-                (coord, self.at(&coord).unwrap())
-            })
-    }
+    grid
 }
 
-fn find_risk(grid: &CaveGrid) -> u32 {
+
+fn find_risk(grid: &SingleVecGrid<u32>) -> u32 {
     let end = (grid.width() - 1, grid.height() - 1);
     let mut visited = SingleVecGrid::new(grid.width(), grid.height());
     let mut queue = BinaryHeap::new();
@@ -154,9 +118,8 @@ fn main() {
         }
     }
 
-    let part1 = CaveGrid::new(&grid, 1, 1);
-    println!("{}", find_risk(&part1));
+    println!("{}", find_risk(&grid));
 
-    let part2 = CaveGrid::new(&grid, 5, 5);
-    println!("{}", find_risk(&part2,));
+    let part2 = expand_grid(grid, 5);
+    println!("{}", find_risk(&part2));
 }
