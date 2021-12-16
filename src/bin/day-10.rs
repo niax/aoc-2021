@@ -1,8 +1,8 @@
-use aoc2021::commons::io::load_stdin_lines;
+use aoc2021::commons::io::load_argv_lines;
 use itertools::Itertools;
 
 fn main() {
-    let input: Vec<String> = load_stdin_lines().map(|x| x.unwrap()).collect();
+    let input: Vec<String> = load_argv_lines().map(|x| x.unwrap()).collect();
 
     let mut part1 = 0;
     let mut part2_scores = Vec::new();

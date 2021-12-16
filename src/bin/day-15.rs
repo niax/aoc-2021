@@ -1,6 +1,6 @@
 use aoc2021::commons::{
     grid::{Grid, SingleVecGrid},
-    io::load_stdin_lines,
+    io::load_argv_lines,
 };
 use lazy_static::lazy_static;
 use std::cmp::Ordering;
@@ -101,7 +101,7 @@ fn find_risk(grid: &SingleVecGrid<u32>) -> u32 {
 
 fn main() {
     let mut rows = Vec::new();
-    for line in load_stdin_lines::<String>() {
+    for line in load_argv_lines::<String>() {
         let row: Vec<_> = line
             .unwrap()
             .chars()

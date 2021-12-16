@@ -1,7 +1,7 @@
 use aoc2021::commons::{
     geom::Point,
     grid::{BitGrid, Grid, SingleVecGrid},
-    io::load_stdin_lines,
+    io::load_argv_lines,
 };
 use std::cmp::{self, Ordering};
 use std::num::ParseIntError;
@@ -103,7 +103,7 @@ impl FromStr for Line {
 }
 
 fn main() {
-    let lines: Vec<Line> = load_stdin_lines().map(|res| res.unwrap()).collect();
+    let lines: Vec<Line> = load_argv_lines().map(|res| res.unwrap()).collect();
 
     let max_x = lines
         .iter()

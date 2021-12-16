@@ -1,4 +1,4 @@
-use aoc2021::commons::io::load_stdin_lines;
+use aoc2021::commons::io::load_argv_lines;
 use bitvec::prelude::*;
 use cached::{cached_key, SizedCache};
 use petgraph::graph::{Graph, NodeIndex, UnGraph};
@@ -74,7 +74,7 @@ fn find_paths_actual(
 fn main() {
     let mut graph = Graph::new_undirected();
     let mut node_ids = HashMap::new();
-    for line in load_stdin_lines::<String>() {
+    for line in load_argv_lines::<String>() {
         let line = line.unwrap();
         let (a, b) = line.split_once('-').unwrap();
         let a_node = *node_ids

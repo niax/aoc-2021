@@ -1,6 +1,6 @@
 use aoc2021::commons::{
     grid::{Grid, VecGrid},
-    io::load_stdin_lines,
+    io::load_argv_lines,
 };
 use itertools::Itertools;
 use std::collections::VecDeque;
@@ -9,7 +9,7 @@ fn main() {
     let mut grid = VecGrid::new();
     let adjacent: Vec<(isize, isize)> = vec![(0, -1), (0, 1), (1, 0), (-1, 0)];
 
-    for line in load_stdin_lines::<String>() {
+    for line in load_argv_lines::<String>() {
         grid.add_row(line.unwrap().chars().map(|c| c.to_digit(10).unwrap()));
     }
 

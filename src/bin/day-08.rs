@@ -1,4 +1,4 @@
-use aoc2021::commons::io::load_stdin_lines;
+use aoc2021::commons::io::load_argv_lines;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::str::FromStr;
@@ -141,7 +141,7 @@ impl FromStr for PuzzleInput {
 }
 
 fn main() {
-    let mut input: Vec<PuzzleInput> = load_stdin_lines().map(|res| res.unwrap()).collect();
+    let mut input: Vec<PuzzleInput> = load_argv_lines().map(|res| res.unwrap()).collect();
 
     let wanted_part1 = vec![1, 4, 7, 8];
     let part1: usize = input

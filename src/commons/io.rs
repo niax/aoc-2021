@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use std::error::Error as StdError;
+use std::env;
 use std::fmt::Debug;
 use std::fs::File;
 use std::io::prelude::*;
@@ -14,6 +15,20 @@ pub enum ParseLinesError<L: StdError> {
     #[error("Parser error")]
     ParseError(L),
 }
+
+pub fn load_argv_lines<T>() -> impl Iterator<Item = Result<T, ParseLinesError<<T as FromStr>::Err>>>
+where
+    T: FromStr,
+    <T as FromStr>::Err: StdError,
+{
+    let read: Box<dyn Read> = match env::args().nth(1) {
+        Some(path) => Box::new(File::open(path).expect("File")),
+        None => Box::new(io::stdin()),
+    };
+    let reader = BufReader::new(read);
+    parse_lines(reader.lines())
+}
+
 
 pub fn load_stdin_lines<T>() -> impl Iterator<Item = Result<T, ParseLinesError<<T as FromStr>::Err>>>
 where

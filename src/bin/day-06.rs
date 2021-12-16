@@ -1,9 +1,7 @@
-use std::io;
-use std::io::prelude::*;
+use aoc2021::commons::io::load_argv_lines;
 
 fn main() {
-    let mut line = String::new();
-    io::stdin().read_to_string(&mut line).expect("File read");
+    let mut line = load_argv_lines::<String>().next().unwrap().unwrap();
     line = line.split_whitespace().collect();
     let mut initial = vec![0; 8];
     for s in line.split(',') {

@@ -1,5 +1,4 @@
-use std::io::prelude::*;
-use std::io::{self, BufReader};
+use aoc2021::commons::io::load_argv_lines;
 
 fn most_common_bit(nums: &[u16], pos: u8) -> bool {
     let mask = 1 << pos;
@@ -14,9 +13,8 @@ fn most_common_bit(nums: &[u16], pos: u8) -> bool {
 }
 
 fn main() {
-    let reader = BufReader::new(io::stdin());
-    let nums: Vec<u16> = reader
-        .lines()
+    let lines = load_argv_lines::<String>();
+    let nums: Vec<u16> = lines
         .map(|res| u16::from_str_radix(&res.unwrap(), 2).unwrap())
         .collect();
     let bit_len = 12;

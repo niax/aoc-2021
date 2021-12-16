@@ -1,6 +1,5 @@
+use aoc2021::commons::io::load_argv_lines;
 use std::cmp;
-use std::io;
-use std::io::prelude::*;
 
 fn find_solution<F>(positions: &[u32], fuel_metric: F) -> u32
 where
@@ -25,8 +24,7 @@ where
 }
 
 fn main() {
-    let mut line = String::new();
-    io::stdin().read_to_string(&mut line).expect("File read");
+    let mut line = load_argv_lines::<String>().next().unwrap().unwrap();
     line = line.split_whitespace().collect();
     let positions: Vec<u32> = line.split(',').map(|x| x.parse().unwrap()).collect();
 

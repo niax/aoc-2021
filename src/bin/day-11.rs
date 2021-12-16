@@ -1,6 +1,6 @@
 use aoc2021::commons::{
     grid::{Grid, SingleVecGrid},
-    io::load_stdin_lines,
+    io::load_argv_lines,
 };
 use std::collections::VecDeque;
 
@@ -81,7 +81,7 @@ fn count_flashes(grid: &SingleVecGrid<u32>) -> usize {
 fn main() {
     let mut grid = SingleVecGrid::new(10, 10);
 
-    for (y, line) in load_stdin_lines::<String>().enumerate() {
+    for (y, line) in load_argv_lines::<String>().enumerate() {
         for (x, c) in line.unwrap().chars().enumerate() {
             grid.set((x, y), c.to_digit(10).unwrap());
         }

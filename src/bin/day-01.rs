@@ -1,7 +1,7 @@
-use aoc2021::commons::io::load_stdin_lines;
+use aoc2021::commons::io::load_argv_lines;
 
 fn main() {
-    let ints: Vec<u32> = load_stdin_lines().map(|res| res.unwrap()).collect();
+    let ints: Vec<u32> = load_argv_lines().map(|res| res.unwrap()).collect();
     // Part 1
     let mut last = 0;
     let mut increases = 0;

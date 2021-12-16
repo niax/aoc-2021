@@ -1,6 +1,6 @@
 use aoc2021::commons::{
     grid::{BitGrid, Grid},
-    io::load_stdin_lines,
+    io::load_argv_lines,
 };
 
 enum Fold {
@@ -47,7 +47,7 @@ fn main() {
     let mut points = Vec::new();
     let mut folds = Vec::new();
     let mut points_done = false;
-    for line in load_stdin_lines::<String>() {
+    for line in load_argv_lines::<String>() {
         let line = line.unwrap();
         if line.is_empty() {
             points_done = true;

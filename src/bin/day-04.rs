@@ -1,5 +1,4 @@
-use std::io::prelude::*;
-use std::io::{self, BufReader};
+use aoc2021::commons::io::load_argv_lines;
 
 #[derive(Debug, Clone)]
 struct BingoBoard {
@@ -65,8 +64,7 @@ impl BingoBoard {
 }
 
 fn main() {
-    let reader = BufReader::new(io::stdin());
-    let mut lines = reader.lines();
+    let mut lines = load_argv_lines::<String>();
     let called_numbers: Vec<u32> = lines
         .next()
         .unwrap()

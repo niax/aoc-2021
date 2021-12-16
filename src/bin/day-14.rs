@@ -1,4 +1,4 @@
-use aoc2021::commons::io::load_stdin_lines;
+use aoc2021::commons::io::load_argv_lines;
 use std::collections::HashMap;
 
 fn minmax<T, I>(iter: I) -> Option<(T, T)>
@@ -58,7 +58,7 @@ fn answer(counter: &HashCounter<char>) {
 fn main() {
     let mut template = Vec::new();
     let mut rules = HashMap::new();
-    for line in load_stdin_lines::<String>() {
+    for line in load_argv_lines::<String>() {
         let line = line.unwrap();
         if line.is_empty() {
             continue;

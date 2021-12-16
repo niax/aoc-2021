@@ -1,4 +1,4 @@
-use aoc2021::commons::io::load_stdin_lines;
+use aoc2021::commons::io::load_argv_lines;
 use bitvec::prelude::*;
 use std::cmp::Ordering;
 
@@ -141,7 +141,7 @@ fn read_packets(reader: &mut BitReader) -> Vec<Packet> {
 }
 
 fn main() {
-    let input = load_stdin_lines::<String>().next().unwrap().unwrap();
+    let input = load_argv_lines::<String>().next().unwrap().unwrap();
     let mut reader = BitReader::new(input.len() * 4);
     for c in input.chars() {
         let d = c.to_digit(16).unwrap();
