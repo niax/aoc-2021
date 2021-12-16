@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 
 #[derive(Debug)]
 struct BitReader {
-    bits: BitVec<Msb0, u8>,
+    bits: BitVec<Msb0, usize>,
     write_pos: usize,
     read_pos: usize,
 }
@@ -100,9 +100,9 @@ fn read_packet(reader: &mut BitReader) -> Packet {
             let mut more = true;
             let mut value: u128 = 0;
             while more {
-                more = reader.read(1) == 1;
-                let part = reader.read(4) as u128;
-                value = value << 4 | part;
+                let part = reader.read(5);
+                more = (part & 0b10000) != 0;
+                value = value << 4 | (part & 0b01111) as u128;
             }
             Packet::Literal(version, value)
         }
