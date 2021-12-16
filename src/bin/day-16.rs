@@ -148,7 +148,6 @@ fn main() {
         reader.push(d as u8, 4);
     }
     let packet = read_packet(&mut reader);
-    println!("{:?}", packet);
     println!("{}", packet.version_sum());
     println!("{}", packet.eval());
 }
