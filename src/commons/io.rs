@@ -1,6 +1,6 @@
 use itertools::Itertools;
-use std::error::Error as StdError;
 use std::env;
+use std::error::Error as StdError;
 use std::fmt::Debug;
 use std::fs::File;
 use std::io::prelude::*;
@@ -28,7 +28,6 @@ where
     let reader = BufReader::new(read);
     parse_lines(reader.lines())
 }
-
 
 pub fn load_stdin_lines<T>() -> impl Iterator<Item = Result<T, ParseLinesError<<T as FromStr>::Err>>>
 where
