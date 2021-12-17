@@ -19,10 +19,23 @@ fn step(pos: Vec2, velocity: Vec2) -> (Vec2, Vec2) {
     (new_pos, new_velocity)
 }
 
+fn test_y(mut dy: isize, y_range: &RangeInclusive<isize>, min_y: isize) -> bool {
+    let mut pos = 0;
+    while pos >= min_y {
+        if y_range.contains(&pos) {
+            return true;
+        }
+        pos += dy;
+        dy -= 1;
+    }
+
+    false
+}
+
 fn test_velocity(
     mut velocity: Vec2,
     x_range: &RangeInclusive<isize>,
-    y_range: &RangeInclusive<isize>
+    y_range: &RangeInclusive<isize>,
 ) -> Option<isize> {
     let mut pos = (0, 0);
     let mut max_height = isize::MIN;
@@ -52,13 +65,18 @@ fn main() {
     let x_range = x1..=x2;
     let y_range = y1..=y2;
 
+    let min_y = *y_range.start().min(y_range.end());
     let y = y_range.end().abs();
+
+    let valid_y: Vec<_> = (-y * 4..y * 4)
+        .filter(|p| test_y(*p, &y_range, min_y))
+        .collect();
 
     let mut max_height = isize::MIN;
     let mut possible_count = 0;
     for dx in 1..=x2 {
-        for dy in -y*4..y*4 {
-            if let Some(height) = test_velocity((dx, dy), &x_range, &y_range) {
+        for dy in &valid_y {
+            if let Some(height) = test_velocity((dx, *dy), &x_range, &y_range) {
                 max_height = std::cmp::max(max_height, height);
                 possible_count += 1;
             }
