@@ -29,4 +29,17 @@ where
     pub fn len(&self) -> usize {
         self.m.len()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.m.is_empty()
+    }
+}
+
+impl<T> Default for HashCounter<T>
+where
+    T: std::hash::Hash + std::cmp::Eq,
+{
+    fn default() -> Self {
+        Self::new()
+    }
 }

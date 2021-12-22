@@ -136,8 +136,8 @@ where
     fn add(self, other: Self) -> Self {
         let mut result = [T::default(); D];
 
-        for i in 0..D {
-            result[i] = self.data[i] + other.data[i];
+        for (i, v) in result.iter_mut().enumerate() {
+            *v = self.data[i] + other.data[i];
         }
 
         Self { data: result }
@@ -164,8 +164,8 @@ where
     fn sub(self, other: Self) -> Self {
         let mut result = [T::default(); D];
 
-        for i in 0..D {
-            result[i] = self.data[i] - other.data[i];
+        for (i, v) in result.iter_mut().enumerate() {
+            *v = self.data[i] - other.data[i];
         }
 
         Self { data: result }
