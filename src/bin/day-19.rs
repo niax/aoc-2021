@@ -60,44 +60,46 @@ impl Scanner {
         &mut self.rotations
     }
 
-    fn axis_distances(&mut self) -> &HashMap<Point, (Point, Point)> {
-        if self.axis_distance_pairs.is_empty() {
-            for perm in self.points.iter().permutations(2) {
-                let (a, b) = if perm[0].magnitude_squared() > perm[1].magnitude_squared() {
-                    (*perm[0], *perm[1])
+    pub fn add_point(&mut self, p: Point) {
+        if self.points.insert(p) {
+            let p_mag = p.magnitude_squared();
+            for existing in &self.points {
+                if p == *existing {
+                    continue;
+                }
+                let (a, b) = if p_mag > existing.magnitude_squared() {
+                    (p, *existing)
                 } else {
-                    (*perm[1], *perm[0])
+                    (*existing, p)
                 };
                 let distances = b - a;
                 let prev = self.axis_distance_pairs.insert(distances, (a, b));
                 if prev.is_some() && !(prev.unwrap().0 == a && prev.unwrap().1 == b) {
-                    panic!("Duplicate axis differences");
+                    panic!("Duplicate axis differences {:?} - {:?}", prev.unwrap(), (a, b));
                 }
             }
         }
-        &self.axis_distance_pairs
     }
 
-    fn map_points<F>(&self, f: F) -> Self
+    fn map_points<F>(&self, mut f: F) -> Self
     where
         F: FnMut(&Point) -> Point,
     {
-        let points = self.points.iter().map(f).collect();
-        Self {
-            index: self.index,
-            points,
-            axis_distance_pairs: HashMap::new(),
-            rotations: Vec::new(),
+        let mut new = Self::new();
+        new.index = self.index;
+        for p in &self.points {
+            new.add_point(f(p));
         }
+        new
     }
 
     pub fn merge(&mut self, other: &mut Scanner) -> Option<Point> {
-        let known_distances = self.axis_distances();
+        let known_distances = &self.axis_distance_pairs;
         let mut best_counters = HashMap::new();
         let mut best_points = HashSet::new();
         for rotated in other.rotations() {
             let mut counters = HashMap::new();
-            let rotated_distances = rotated.axis_distances();
+            let rotated_distances = &rotated.axis_distance_pairs;
             for (distance, other_points) in rotated_distances {
                 if let Some(our_points) = known_distances.get(distance) {
                     for p in [other_points.0, other_points.1] {
@@ -125,9 +127,8 @@ impl Scanner {
                 let translation = translations.iter().next().unwrap();
                 for p in &best_points {
                     let translated = *p + *translation;
-                    self.points.insert(translated);
+                    self.add_point(translated);
                 }
-                self.axis_distance_pairs.clear();
                 return Some(*translation);
             }
         }
@@ -154,7 +155,7 @@ fn main() {
             let y = parts.next().unwrap();
             let z = parts.next().unwrap();
 
-            scanner.points.insert(Point3D::new(x, y, z));
+            scanner.add_point(Point3D::new(x, y, z));
         }
     }
     scanners.push_back(scanner);
