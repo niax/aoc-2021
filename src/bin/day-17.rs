@@ -41,7 +41,7 @@ impl Finder {
             x_range,
             y_range,
             min_x,
-            max_x, 
+            max_x,
             min_y,
             max_y,
         }
@@ -49,7 +49,7 @@ impl Finder {
 
     pub fn test_x(&self, mut dx: isize) -> bool {
         let mut pos = 0;
-        while pos <= self.max_x && dx > 0{
+        while pos <= self.max_x && dx > 0 {
             if self.x_range.contains(&pos) {
                 return true;
             }
@@ -101,10 +101,8 @@ fn main() {
 
     let finder = Finder::new(x1, x2, y1, y2);
 
-    let y = finder.max_y.abs()*2;
-    let valid_y: Vec<_> = (-y..=y)
-        .filter(|p| finder.test_y(*p))
-        .collect();
+    let y = finder.max_y.abs() * 2;
+    let valid_y: Vec<_> = (-y..=y).filter(|p| finder.test_y(*p)).collect();
 
     let mut max_height = isize::MIN;
     let mut possible_count = 0;
