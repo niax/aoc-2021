@@ -1,4 +1,4 @@
-use aoc2021::commons::{geom::Point, io::load_argv_lines};
+use aoc2021::commons::{geom::Point2D, io::load_argv_lines};
 use std::num::ParseIntError;
 use std::str::FromStr;
 use thiserror::Error;
@@ -47,7 +47,7 @@ impl FromStr for Direction {
 fn main() {
     let dirs: Vec<Direction> = load_argv_lines().map(|res| res.unwrap()).collect();
     // Part 1
-    let mut point = Point::origin();
+    let mut point = Point2D::origin();
     for dir in dirs.iter() {
         let offset = match dir {
             Direction::Forward(x) => (*x as i32, 0),
@@ -60,7 +60,7 @@ fn main() {
 
     // Part 2
     let mut aim: i32 = 0;
-    point = Point::origin();
+    point = Point2D::origin();
     for dir in dirs {
         let offset = match dir {
             Direction::Forward(x) => (x as i32, aim * x as i32),

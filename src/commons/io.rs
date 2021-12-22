@@ -29,6 +29,21 @@ where
     parse_lines(reader.lines())
 }
 
+pub fn load_argv_records<T>(
+    end_of_record: &str,
+) -> impl Iterator<Item = Result<Vec<T>, ParseLinesError<<T as FromStr>::Err>>>
+where
+    T: FromStr,
+    <T as FromStr>::Err: StdError,
+{
+    let read: Box<dyn Read> = match env::args().nth(1) {
+        Some(path) => Box::new(File::open(path).expect("File")),
+        None => Box::new(io::stdin()),
+    };
+    let reader = BufReader::new(read);
+    parse_records(reader.lines(), end_of_record.to_string())
+}
+
 pub fn load_stdin_lines<T>() -> impl Iterator<Item = Result<T, ParseLinesError<<T as FromStr>::Err>>>
 where
     T: FromStr,

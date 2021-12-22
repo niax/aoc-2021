@@ -1,5 +1,5 @@
 use aoc2021::commons::{
-    geom::Point,
+    geom::Point2D,
     grid::{BitGrid, Grid, SingleVecGrid},
     io::load_argv_lines,
 };
@@ -10,8 +10,8 @@ use thiserror::Error;
 
 #[derive(Debug)]
 struct Line {
-    from: Point<usize>,
-    to: Point<usize>,
+    from: Point2D<usize>,
+    to: Point2D<usize>,
 }
 
 #[derive(Debug, Error)]
@@ -32,11 +32,11 @@ fn sign(i: isize) -> isize {
 }
 
 impl Line {
-    pub fn from(&self) -> &Point<usize> {
+    pub fn from(&self) -> &Point2D<usize> {
         &self.from
     }
 
-    pub fn to(&self) -> &Point<usize> {
+    pub fn to(&self) -> &Point2D<usize> {
         &self.to
     }
 
@@ -96,8 +96,8 @@ impl FromStr for Line {
             .collect();
 
         Ok(Line {
-            from: Point::new(from_str[0], from_str[1]),
-            to: Point::new(to_str[0], to_str[1]),
+            from: Point2D::new(from_str[0], from_str[1]),
+            to: Point2D::new(to_str[0], to_str[1]),
         })
     }
 }
