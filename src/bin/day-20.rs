@@ -1,5 +1,5 @@
 use aoc2021::commons::{
-    grid::{Grid, SparseGrid},
+    grid::{BitGrid, Grid},
     io::load_argv_lines,
 };
 use bitvec::prelude::*;
@@ -8,46 +8,32 @@ struct Enhancer {
     enhancement: BitVec,
 }
 
-#[allow(dead_code)]
-fn print_grid(g: &SparseGrid<bool>) {
-    let min_x = g.with_values().map(|(x, _)| x).min().unwrap();
-    let max_x = g.with_values().map(|(x, _)| x).max().unwrap();
-    let min_y = g.with_values().map(|(_, y)| y).min().unwrap();
-    let max_y = g.with_values().map(|(_, y)| y).max().unwrap();
-    println!("{:?} - {:?}", (min_x, min_y), (max_x, max_y));
-
-    for y in *min_y..=*max_y {
-        let row = (*min_x..=*max_x)
-            .map(|x| {
-                if *g.at(&(x, y)).unwrap_or(&false) {
-                    '#'
-                } else {
-                    '.'
-                }
-            })
-            .collect::<String>();
-        println!("{}", row);
-    }
-}
-
 impl Enhancer {
-    fn step(&self, grid: SparseGrid<bool>, default: bool) -> SparseGrid<bool> {
-        let mut new = SparseGrid::new();
-        let min_x = grid.with_values().map(|(x, _)| x).min().unwrap() - 1;
-        let max_x = grid.with_values().map(|(x, _)| x).max().unwrap() + 1;
-        let min_y = grid.with_values().map(|(_, y)| y).min().unwrap() - 1;
-        let max_y = grid.with_values().map(|(_, y)| y).max().unwrap() + 1;
+    fn step(&self, grid: BitGrid, default: bool) -> BitGrid {
+        let mut new = BitGrid::new(grid.width() + 2, grid.height() + 2);
 
-        for y in min_y..=max_y {
-            for x in min_x..=max_x {
+        for y in 0..new.width() {
+            for x in 0..new.height() {
                 let mut input = BitVec::<Msb0, u32>::new();
                 for dy in -1..=1 {
                     for dx in -1..=1 {
-                        input.push(*grid.at(&(x + dx, y + dy)).unwrap_or(&default));
+                        let sub_x = x as isize + dx - 1;
+                        let sub_y = y as isize + dy - 1;
+                        if sub_x < 0 || sub_y < 0 {
+                            input.push(default);
+                        } else {
+                            input.push(
+                                *grid
+                                    .at(&(sub_x as usize, sub_y as usize))
+                                    .unwrap_or(&default),
+                            );
+                        }
                     }
                 }
                 let enhance = input.load_be::<u32>();
-                new.set((x, y), self.enhancement[enhance as usize]);
+                if self.enhancement[enhance as usize] {
+                    new.set((x, y), true);
+                }
             }
         }
 
@@ -59,11 +45,12 @@ fn main() {
     let mut lines = load_argv_lines::<String>().map(|x| x.unwrap());
     let enhancement: BitVec = lines.next().unwrap().chars().map(|c| c == '#').collect();
     lines.next().unwrap(); // skip the newline
+    let rows: Vec<_> = lines.collect();
     let enhancer = Enhancer { enhancement };
-    let mut grid = SparseGrid::new();
-    for (y, line) in lines.enumerate() {
+    let mut grid = BitGrid::new(rows[0].len(), rows.len());
+    for (y, line) in rows.iter().enumerate() {
         for (x, c) in line.chars().enumerate() {
-            grid.set((x as isize, y as isize), c == '#');
+            grid.set((x, y), c == '#');
         }
     }
 
@@ -76,8 +63,8 @@ fn main() {
             enhancer.enhancement[0]
         };
         if i == 1 {
-            println!("{}", grid.points().iter().filter(|(_, x)| **x).count());
+            println!("{}", grid.set_cell_count());
         }
     }
-    println!("{}", grid.points().iter().filter(|(_, x)| **x).count());
+    println!("{}", grid.set_cell_count());
 }
