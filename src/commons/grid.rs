@@ -37,9 +37,14 @@ lazy_static! {
     };
     static ref ADJACENT: Vec<(isize, isize)> = vec![(0, -1), (0, 1), (1, 0), (-1, 0)];
     pub static ref SURROUND: Vec<(isize, isize)> = vec![
-        (-1, -1), (0, -1), (1, -1),
-        (-1, 0), (1, 0),
-        (-1, 1), (0, 1), (1, 1),
+        (-1, -1),
+        (0, -1),
+        (1, -1),
+        (-1, 0),
+        (1, 0),
+        (-1, 1),
+        (0, 1),
+        (1, 1),
     ];
 }
 
@@ -404,7 +409,7 @@ impl<T> SparseGrid<T> {
         }
     }
 
-    pub fn with_values(&self) -> impl Iterator<Item=&(isize, isize)> {
+    pub fn with_values(&self) -> impl Iterator<Item = &(isize, isize)> {
         self.cells.keys()
     }
 

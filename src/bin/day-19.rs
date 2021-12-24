@@ -75,7 +75,11 @@ impl Scanner {
                 let distances = b - a;
                 let prev = self.axis_distance_pairs.insert(distances, (a, b));
                 if prev.is_some() && !(prev.unwrap().0 == a && prev.unwrap().1 == b) {
-                    panic!("Duplicate axis differences {:?} - {:?}", prev.unwrap(), (a, b));
+                    panic!(
+                        "Duplicate axis differences {:?} - {:?}",
+                        prev.unwrap(),
+                        (a, b)
+                    );
                 }
             }
         }

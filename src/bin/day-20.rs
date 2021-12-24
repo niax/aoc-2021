@@ -1,11 +1,12 @@
-use aoc2021::commons::{grid::{Grid, SparseGrid, SURROUND}, io::load_argv_lines};
+use aoc2021::commons::{
+    grid::{Grid, SparseGrid},
+    io::load_argv_lines,
+};
 use bitvec::prelude::*;
-
 
 struct Enhancer {
     enhancement: BitVec,
 }
-
 
 #[allow(dead_code)]
 fn print_grid(g: &SparseGrid<bool>) {
@@ -17,7 +18,13 @@ fn print_grid(g: &SparseGrid<bool>) {
 
     for y in *min_y..=*max_y {
         let row = (*min_x..=*max_x)
-            .map(|x| if *g.at(&(x, y)).unwrap_or(&false) { '#' } else {'.'})
+            .map(|x| {
+                if *g.at(&(x, y)).unwrap_or(&false) {
+                    '#'
+                } else {
+                    '.'
+                }
+            })
             .collect::<String>();
         println!("{}", row);
     }
@@ -36,7 +43,7 @@ impl Enhancer {
                 let mut input = BitVec::<Msb0, u32>::new();
                 for dy in -1..=1 {
                     for dx in -1..=1 {
-                        input.push(*grid.at(&(x + dx, y+dy)).unwrap_or(&default));
+                        input.push(*grid.at(&(x + dx, y + dy)).unwrap_or(&default));
                     }
                 }
                 let enhance = input.load_be::<u32>();
@@ -51,7 +58,6 @@ impl Enhancer {
 fn main() {
     let mut lines = load_argv_lines::<String>().map(|x| x.unwrap());
     let enhancement: BitVec = lines.next().unwrap().chars().map(|c| c == '#').collect();
-    println!("{}", enhancement.iter().map(|b| if *b { '#' } else { '.' } ).collect::<String>());
     lines.next().unwrap(); // skip the newline
     let enhancer = Enhancer { enhancement };
     let mut grid = SparseGrid::new();
@@ -61,12 +67,17 @@ fn main() {
         }
     }
 
-    print_grid(&grid);
     let mut default = false;
-    for i in 0..2 {
+    for i in 0..50 {
         grid = enhancer.step(grid, default);
-        default = if default { enhancer.enhancement[511] } else { enhancer.enhancement[0] }
+        default = if default {
+            enhancer.enhancement[511]
+        } else {
+            enhancer.enhancement[0]
+        };
+        if i == 2 {
+            println!("{}", grid.points().iter().filter(|(_, x)| **x).count());
+        }
     }
-    print_grid(&grid);
     println!("{}", grid.points().iter().filter(|(_, x)| **x).count());
 }
