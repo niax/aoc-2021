@@ -14,24 +14,27 @@ impl Enhancer {
 
         for y in 0..new.width() {
             for x in 0..new.height() {
-                let mut input = BitVec::<Msb0, u32>::new();
+                let mut enhance = 0;
                 for dy in -1..=1 {
                     for dx in -1..=1 {
+                        enhance <<= 1;
                         let sub_x = x as isize + dx - 1;
                         let sub_y = y as isize + dy - 1;
                         if sub_x < 0 || sub_y < 0 {
-                            input.push(default);
+                            enhance += if default { 1 } else { 0 };
                         } else {
-                            input.push(
-                                *grid
-                                    .at(&(sub_x as usize, sub_y as usize))
-                                    .unwrap_or(&default),
-                            );
+                            enhance += if *grid
+                                .at(&(sub_x as usize, sub_y as usize))
+                                .unwrap_or(&default)
+                            {
+                                1
+                            } else {
+                                0
+                            };
                         }
                     }
                 }
-                let enhance = input.load_be::<u32>();
-                if self.enhancement[enhance as usize] {
+                if self.enhancement[enhance] {
                     new.set((x, y), true);
                 }
             }
