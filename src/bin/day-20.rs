@@ -75,7 +75,7 @@ fn main() {
         } else {
             enhancer.enhancement[0]
         };
-        if i == 2 {
+        if i == 1 {
             println!("{}", grid.points().iter().filter(|(_, x)| **x).count());
         }
     }
