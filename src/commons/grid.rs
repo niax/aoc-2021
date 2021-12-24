@@ -36,6 +36,11 @@ lazy_static! {
         h
     };
     static ref ADJACENT: Vec<(isize, isize)> = vec![(0, -1), (0, 1), (1, 0), (-1, 0)];
+    pub static ref SURROUND: Vec<(isize, isize)> = vec![
+        (-1, -1), (0, -1), (1, -1),
+        (-1, 0), (1, 0),
+        (-1, 1), (0, 1), (1, 1),
+    ];
 }
 
 pub trait Grid {
@@ -397,6 +402,14 @@ impl<T> SparseGrid<T> {
             }
             (max - min + 1) as usize
         }
+    }
+
+    pub fn with_values(&self) -> impl Iterator<Item=&(isize, isize)> {
+        self.cells.keys()
+    }
+
+    pub fn count_with_value(&self) -> usize {
+        self.cells.len()
     }
 }
 
