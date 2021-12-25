@@ -3,7 +3,7 @@ use cached::proc_macro::cached;
 use lazy_static::lazy_static;
 
 lazy_static! {
-    static ref DICE_OUTCOMES: Vec<(u8, u8)> = {
+    static ref DICE_OUTCOMES: Vec<(u16, u8)> = {
         let mut outcomes = [0; 10];
         for i in 1..=3 {
             for j in 1..=3 {
@@ -16,36 +16,35 @@ lazy_static! {
             .iter()
             .enumerate()
             .filter(|(_, s)| **s > 0)
-            .map(|(s, c)| (s as u8, *c))
+            .map(|(s, c)| (s as u16, *c))
             .collect()
     };
 }
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 struct Player {
-    pos: u8,
+    pos: u16,
     score: u16,
 }
 
 fn part1(mut p1: Player, mut p2: Player) -> u32 {
     let mut die = 0;
     let mut rolls = 0;
-    let mut players = [&mut p1, &mut p2];
+    let (mut active_player, next_player) = (&mut p1, &mut p2);
     loop {
-        for (i, player) in players.iter_mut().enumerate() {
-            for _ in 0..3 {
-                player.pos += die + 1;
-                player.pos %= 10;
-                rolls += 1;
-                die += 1;
-                die %= 100;
-            }
-            player.score += player.pos as u16 + 1;
-            if player.score >= 1000 {
-                let loser = &players[if i == 0 { 1 } else { 0 }];
-                return loser.score as u32 * rolls as u32;
-            }
+        let mut roll: u16 = 0;
+        for _ in 0..3 {
+            die += 1;
+            roll += die;
+            die %= 100;
         }
+        rolls += 3;
+        active_player.pos = (active_player.pos + roll) % 10;
+        active_player.score += active_player.pos as u16 + 1;
+        if active_player.score >= 1000 {
+            return next_player.score as u32 * rolls as u32;
+        }
+        std::mem::swap(active_player, next_player);
     }
 }
 
@@ -79,7 +78,7 @@ fn main() {
         let x = x.unwrap();
         let (_, num) = x.split_once(": ").unwrap();
         Player {
-            pos: num.parse::<u8>().unwrap() - 1,
+            pos: num.parse::<u16>().unwrap() - 1,
             score: 0,
         }
     });
