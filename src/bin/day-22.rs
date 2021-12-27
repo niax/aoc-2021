@@ -144,10 +144,7 @@ impl FromStr for Cuboid {
 }
 
 fn print_answer(cuboids: &[Cuboid]) {
-    println!(
-        "{}",
-        cuboids.iter().map(|c| c.volume()).sum::<isize>()
-    );
+    println!("{}", cuboids.iter().map(|c| c.volume()).sum::<isize>());
 }
 
 fn main() {
