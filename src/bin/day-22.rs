@@ -157,16 +157,18 @@ fn main() {
     let mut done_part1 = false;
     let mut seen_cuboids: Vec<Cuboid> = Vec::new();
     for cuboid in in_cuboids {
+        let mut intersections = Vec::with_capacity(seen_cuboids.len());
         if !done_part1 && !cuboid.intersects(&part1_cuboid) {
             done_part1 = true;
             print_answer(&seen_cuboids);
         }
 
-        for existing in seen_cuboids.clone() {
+        for existing in &seen_cuboids {
             if let Some(intersect) = cuboid.intersection(&existing) {
-                seen_cuboids.push(intersect);
+                intersections.push(intersect);
             }
         }
+        seen_cuboids.extend(intersections);
         if cuboid.sign > 0 {
             seen_cuboids.push(cuboid);
         }
