@@ -1,9 +1,9 @@
 use aoc2021::commons::io::load_argv_lines;
-use fasthash::{metro::crc::Hash64_1, RandomState};
 use std::collections::HashMap;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use thiserror::Error;
+use fasthash::{RandomState, metro::crc::Hash64_1};
 
 #[derive(Debug)]
 enum Register {
@@ -178,7 +178,7 @@ fn main() {
                     i.execute(&mut regs, v);
                 }
 
-                if regs.z > 200_000 {
+                if regs.z > 350_000 {
                     // Abort on Z values that are growing out of control
                     continue;
                 }
