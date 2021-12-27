@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use thiserror::Error;
+use fasthash::{RandomState, metro::crc::Hash64_1};
 
 #[derive(Debug)]
 enum Register {
@@ -163,20 +164,25 @@ fn main() {
     }
     sub_progs.push(curr);
 
-    let mut in_regs = HashMap::new();
-    in_regs.insert(RegisterPage::default(), (0, 0));
+    let h = RandomState::<Hash64_1>::new();
+    let mut in_regs = HashMap::with_capacity_and_hasher(1, h);
+    in_regs.insert(0, (0, 0));
     for prog in &sub_progs {
-        let mut next_regs = HashMap::with_capacity(in_regs.len());
+        let h = RandomState::<Hash64_1>::new();
+        let mut next_regs = HashMap::with_capacity_and_hasher(in_regs.len(), h);
         for v in 1..=9 {
-            for (in_reg, n) in &in_regs {
-                let mut regs = in_reg.clone();
+            for (z, n) in &in_regs {
+                let mut regs = RegisterPage::default();
+                regs.z = *z;
                 for i in prog {
                     i.execute(&mut regs, v);
                 }
-                regs.x = 0;
-                regs.y = 0;
-                regs.w = 0;
-                let min_max = next_regs.entry(regs).or_insert((isize::MAX, isize::MIN));
+
+                if regs.z > 1_000_000 {
+                    // Abort on Z values that are growing out of control
+                    continue;
+                }
+                let min_max = next_regs.entry(regs.z).or_insert((isize::MAX, isize::MIN));
                 min_max.0 = min_max.0.min(n.0 * 10 + v);
                 min_max.1 = min_max.1.max(n.1 * 10 + v);
             }
@@ -184,7 +190,7 @@ fn main() {
         in_regs = next_regs;
     }
 
-    let (min, max) = in_regs.get(&RegisterPage::default()).unwrap();
+    let (min, max) = in_regs.get(&0).unwrap();
     println!("{}", max);
     println!("{}", min);
 }
