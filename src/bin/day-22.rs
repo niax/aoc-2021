@@ -97,7 +97,7 @@ impl FromStr for Cuboid {
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
         let caps = RE
-            .captures(&input)
+            .captures(input)
             .ok_or(InstructionParseError::MissingField)?;
 
         let on = match caps
@@ -143,10 +143,10 @@ impl FromStr for Cuboid {
     }
 }
 
-fn print_answer(cuboids: &Vec<Cuboid>) {
+fn print_answer(cuboids: &[Cuboid]) {
     println!(
         "{}",
-        cuboids.clone().iter().map(|c| c.volume()).sum::<isize>()
+        cuboids.iter().map(|c| c.volume()).sum::<isize>()
     );
 }
 
@@ -164,7 +164,7 @@ fn main() {
         }
 
         for existing in &seen_cuboids {
-            if let Some(intersect) = cuboid.intersection(&existing) {
+            if let Some(intersect) = cuboid.intersection(existing) {
                 intersections.push(intersect);
             }
         }
