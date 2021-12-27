@@ -6,67 +6,20 @@ pub struct Point<T, const D: usize> {
     data: [T; D],
 }
 
-impl<T> Point<T, 2> {
-    pub fn new(x: T, y: T) -> Point<T, 2> {
-        Point { data: [x, y] }
-    }
-
-    pub fn x(&self) -> &T {
-        &self.data[0]
-    }
-
-    pub fn y(&self) -> &T {
-        &self.data[1]
-    }
-
-    pub fn tuple_ref(&self) -> (&T, &T) {
-        (&self.data[0], &self.data[1])
-    }
-
-    pub fn tuple_copy(&self) -> (T, T)
+impl<T, const D: usize> Point<T, D> {
+    pub fn with_elem(&self, dim: usize, elem: T) -> Self
     where
         T: Copy,
     {
-        (self.data[0], self.data[1])
-    }
-}
-pub type Point2D<T> = Point<T, 2>;
-
-impl<T> Point<T, 3> {
-    pub fn new(x: T, y: T, z: T) -> Point<T, 3> {
-        Point { data: [x, y, z] }
+        let mut new = *self;
+        new.data[dim] = elem;
+        new
     }
 
-    pub fn x(&self) -> &T {
-        &self.data[0]
-    }
-
-    pub fn y(&self) -> &T {
-        &self.data[1]
-    }
-
-    pub fn z(&self) -> &T {
-        &self.data[2]
-    }
-
-    pub fn tuple_ref(&self) -> (&T, &T, &T) {
-        (&self.data[0], &self.data[1], &self.data[2])
-    }
-
-    pub fn tuple_copy(&self) -> (T, T, T)
+    pub fn distance_squared(&self, other: &Point<T, D>) -> T
     where
-        T: Copy,
+        T: Default + AddAssign + Ord + Sub<Output = T> + Mul<Output = T> + Copy,
     {
-        (self.data[0], self.data[1], self.data[2])
-    }
-}
-pub type Point3D<T> = Point<T, 3>;
-
-impl<T, const D: usize> Point<T, D>
-where
-    T: Default + AddAssign + Ord + Sub<Output = T> + Mul<Output = T> + Copy,
-{
-    pub fn distance_squared(&self, other: &Point<T, D>) -> T {
         let mut sum = T::default();
         for i in 0..D {
             let delta = self.data[i].max(other.data[i]) - self.data[i].min(other.data[i]);
@@ -75,11 +28,17 @@ where
         sum
     }
 
-    pub fn magnitude_squared(&self) -> T {
+    pub fn magnitude_squared(&self) -> T
+    where
+        T: Default + AddAssign + Ord + Sub<Output = T> + Mul<Output = T> + Copy,
+    {
         Point::<T, D>::origin().distance_squared(self)
     }
 
-    pub fn manhattan_distance(&self, other: &Point<T, D>) -> T {
+    pub fn manhattan_distance(&self, other: &Point<T, D>) -> T
+    where
+        T: Default + AddAssign + Ord + Sub<Output = T> + Mul<Output = T> + Copy,
+    {
         let mut sum = T::default();
         for i in 0..D {
             let delta = self.data[i].max(other.data[i]) - self.data[i].min(other.data[i]);
@@ -234,6 +193,97 @@ where
         self.data[1] -= other.1;
     }
 }
+
+impl<T> Point<T, 2> {
+    pub fn new(x: T, y: T) -> Point<T, 2> {
+        Point { data: [x, y] }
+    }
+
+    pub fn x(&self) -> &T {
+        &self.data[0]
+    }
+
+    pub fn with_x(&self, x: T) -> Self
+    where
+        T: Copy,
+    {
+        self.with_elem(0, x)
+    }
+
+    pub fn y(&self) -> &T {
+        &self.data[1]
+    }
+
+    pub fn with_y(&self, y: T) -> Self
+    where
+        T: Copy,
+    {
+        self.with_elem(0, y)
+    }
+
+    pub fn tuple_ref(&self) -> (&T, &T) {
+        (&self.data[0], &self.data[1])
+    }
+
+    pub fn tuple_copy(&self) -> (T, T)
+    where
+        T: Copy,
+    {
+        (self.data[0], self.data[1])
+    }
+}
+pub type Point2D<T> = Point<T, 2>;
+
+impl<T> Point<T, 3> {
+    pub fn new(x: T, y: T, z: T) -> Point<T, 3> {
+        Point { data: [x, y, z] }
+    }
+
+    pub fn x(&self) -> &T {
+        &self.data[0]
+    }
+
+    pub fn with_x(&self, x: T) -> Self
+    where
+        T: Copy,
+    {
+        self.with_elem(0, x)
+    }
+
+    pub fn y(&self) -> &T {
+        &self.data[1]
+    }
+
+    pub fn with_y(&self, y: T) -> Self
+    where
+        T: Copy,
+    {
+        self.with_elem(0, y)
+    }
+
+    pub fn z(&self) -> &T {
+        &self.data[2]
+    }
+
+    pub fn with_z(&self, z: T) -> Self
+    where
+        T: Copy,
+    {
+        self.with_elem(0, z)
+    }
+
+    pub fn tuple_ref(&self) -> (&T, &T, &T) {
+        (&self.data[0], &self.data[1], &self.data[2])
+    }
+
+    pub fn tuple_copy(&self) -> (T, T, T)
+    where
+        T: Copy,
+    {
+        (self.data[0], self.data[1], self.data[2])
+    }
+}
+pub type Point3D<T> = Point<T, 3>;
 
 #[cfg(test)]
 mod tests {
