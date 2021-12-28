@@ -1,9 +1,9 @@
 use aoc2021::commons::io::load_argv_lines;
+use fasthash::{metro::crc::Hash64_1, RandomState};
 use std::collections::HashMap;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use thiserror::Error;
-use fasthash::{RandomState, metro::crc::Hash64_1};
 
 #[derive(Debug)]
 enum Register {
